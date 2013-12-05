@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Find-A-Record Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Find-A-Record Administration">
+    <link href="/assets/vendor/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/assets/css/site.css" rel="stylesheet" type="text/css">
+    <% if(typeof header !== 'undefined' && header.css){%>
+      <% for(var i=0; i<header.css.length; i++) {%>
+      <link href="/assets/<%= header.css[i] %>" rel="stylesheet" type="text/css">
+      <% } %>
+    <% } %>
+    <link href='//fonts.googleapis.com/css?family=Rufina:400,700|Sintony:400,700' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+    <div id="header">
+      <a href="/">Home</a>
+      <a href="/about">About</a>
+      <a href="/license">License</a>
+      <a class="pull-right" href="#">Login</a>
+    </div>
+    <div id="content">
+      <div class="container">
