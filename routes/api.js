@@ -4,7 +4,8 @@ module.exports = function(app){
       path = require('path'),
       _ = require('underscore')._,
       async = require('async'),
-      geoAssert = require('geojson-assert');
+      geoAssert = require('geojson-assert'),
+      mkdirp = require('mkdirp');
   
   // Get a place json file
   app.get('/api/v0/place/:id/:geo?', function(req, res){
@@ -25,6 +26,36 @@ module.exports = function(app){
         res.json(apiReturn(false, 404,"Not Found"));
       } else {
         res.json(apiReturn(JSON.parse(data)));
+      }
+    });
+    
+  });
+  
+  // Delete a place json file
+  app.delete('/api/v0/place/:id/:geo?', function(req, res){
+    
+    if(!req.params.geo) {
+      var id = req.params.id;
+      var filename = path.join(__dirname,'..','data',id.substr(0,2),id.substr(2,2),id.substr(4),'place.json');
+    } else {
+      var id = req.params.id;
+      var geo = req.params.geo;
+      var filename = path.join(__dirname,'..','data',id.substr(0,2),id.substr(2,2),id.substr(4),geo+'.geojson');
+    }
+    
+    fs.exists(filename,function(exists) {
+      if(exists) {
+        fs.rename(filename,filename+'.'+Date.now(),function(error) {
+          if(error) {
+            res.status(500);
+            return res.json(apiReturn(false, 500,error.message));
+          } else {
+            return res.json(apiReturn(true));
+          }
+        });
+      } else {
+        res.status(404);
+        return res.json(apiReturn(false, 404,"Not Found"));
       }
     });
     
@@ -65,9 +96,6 @@ module.exports = function(app){
       
     }
     
-    
-    
-    
     async.auto({
       fileExists:function(callback) {
         // If old file exists, rename it
@@ -81,7 +109,18 @@ module.exports = function(app){
           }
         });
       },
-      saveFile:['fileExists',function(callback) {
+      dirExists:function(callback) {
+        fs.exists(filepath,function(exists) {
+          if(exists) {
+            return callback(null);
+          } else {
+            mkdirp(filepath,function(error) {
+              return callback(error);
+            });
+          }
+        });
+      },
+      saveFile:['fileExists','dirExists',function(callback) {
         fs.writeFile(filename,JSON.stringify(req.body),function(error) {
           return callback(error);
         });

@@ -9,6 +9,7 @@
     "openid": "0.5.5",
     "underscore": "1.5.x",
     "async": "0.2.9",
-    "geojson-assert":"0.0.x"
+    "geojson-assert":"0.0.x",
+    "mkdirp":"0.3.x"
   }
 }
