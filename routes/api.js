@@ -5,7 +5,8 @@ module.exports = function(app){
       _ = require('underscore')._,
       async = require('async'),
       geoAssert = require('geojson-assert'),
-      mkdirp = require('mkdirp');
+      mkdirp = require('mkdirp'),
+      check = require('validator').check;
   
   // Get a place json file
   app.get('/api/v0/place/:id/:geo?', function(req, res){
@@ -144,7 +145,11 @@ module.exports = function(app){
     // Check id
     if(_.isUndefined(obj.id)) throw new Error("id is required");
     if(obj.id !== id) throw new Error("ids must match");
-    // TODO check if id == uuidv4
+    try {
+      check(obj.id).isUUIDv4()
+    } catch(error) {
+      throw new Error("id must be a UUIDv4");
+    }
     
     // Check version
     if(_.isUndefined(obj.version)) throw new Error("version is required");
