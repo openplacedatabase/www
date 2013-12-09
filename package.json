@@ -8,6 +8,7 @@
     "superagent": "0.15.4",
     "openid": "0.5.5",
     "underscore": "1.5.x",
-    "async": "0.2.9"
+    "async": "0.2.9",
+    "geojson-assert":"0.0.x"
   }
 }
