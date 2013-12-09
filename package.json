@@ -11,6 +11,7 @@
     "async": "0.2.9",
     "geojson-assert":"0.0.x",
     "mkdirp":"0.3.x",
-    "validator":"2.0.x"
+    "validator":"2.0.x",
+    "elastic.js": "1.1.x"
   }
 }
