@@ -6,19 +6,23 @@
     <meta name="description" content="Open Place Database">
     <link href="/assets/vendor/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link href="/assets/css/site.css" rel="stylesheet" type="text/css">
-    <% if(typeof header !== 'undefined' && header.css){%>
-      <% for(var i=0; i<header.css.length; i++) {%>
+    <% if(typeof header !== 'undefined' && header.css){ %>
+      <% for(var i=0; i<header.css.length; i++) { %>
       <link href="/assets/<%= header.css[i] %>" rel="stylesheet" type="text/css">
       <% } %>
     <% } %>
-    <link href='//fonts.googleapis.com/css?family=Rufina:400,700|Sintony:400,700' rel='stylesheet' type='text/css'>
   </head>
   <body>
-    <div id="header">
-      <a href="/">Home</a>
-      <a href="/about">About</a>
-      <a href="/license">License</a>
-      <a class="pull-right" href="#">Login</a>
-    </div>
-    <div id="content">
+    <nav class="navbar" role="navigation">
       <div class="container">
+        <ul class="nav navbar-nav">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="/license">License</a></li>
+        </ul>
+        <ul class="nav navbar-nav pull-right">
+          <li><a class="pull-right" href="#">Login</a></li>
+        </ul>
+      </div>
+    </nav>
+    <div id="content">
