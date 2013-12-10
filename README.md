@@ -31,7 +31,9 @@ OPD_GOOGLE_MAPS_KEY="<Your google maps key>
 curl -XPUT 'localhost:9200/places/' -d '{}'
 ````
 
-1. Create a Filesystem River to index the places data by running the following command. MAKE SURE TO REPLACE `<root_dir>` with the path to the root of your clones repo:
+1. Create a Filesystem River to index the places data by running the following command.
+
+    WARNING - Make sure to replace `<root_dir>` with the path to the root of your cloned repo:
 ````
 curl -XPUT 'localhost:9200/_river/places/_meta' -d '
 {
