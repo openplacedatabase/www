@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Open Place Database">
     <link href="/assets/vendor/css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link href="/assets/css/site.css" rel="stylesheet" type="text/css">
-    <% if(typeof header !== 'undefined' && header.css){ %>
-      <% for(var i=0; i<header.css.length; i++) { %>
-      <link href="/assets/<%= header.css[i] %>" rel="stylesheet" type="text/css">
+    <link href="/assets/css/site.css" rel="stylesheet" media="screen">
+    <% if(typeof css !== 'undefined' && css.length){ %>
+      <% for(var i=0; i<css.length; i++) { %>
+      <link href="/assets/css/<%= css[i] %>" rel="stylesheet" type="text/css">
       <% } %>
     <% } %>
   </head>

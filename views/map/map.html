@@ -1,0 +1,10 @@
+<% include ../_globals/header.html %>
+
+<div id="map"></div>
+
+<script>
+  var GOOGLE_API_KEY = "<%= google_key %>";
+</script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false&key=<%= google_key %>" ></script>
+
+<% include ../_globals/js_footer.html %>
