@@ -27,7 +27,7 @@ module.exports = function(app){
     //setup query
     var qsQuery = ejs.QueryStringQuery(query);
     qsQuery.defaultField('names');
-    var r = ejs.Request().indices('mydocs').query(qsQuery);
+    var r = ejs.Request().indices('places').query(qsQuery);
     
     //call query
     r.doSearch(function(esResults) {
