@@ -1,8 +1,8 @@
 var map,
     googleShape,
     mapOptions = {
-      center: new google.maps.LatLng(54.5,-5),
-      zoom: 5,
+      center: new google.maps.LatLng(20,-10),
+      zoom: 3,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       panControl: false,
       zoomControl: true,
@@ -74,11 +74,16 @@ function placeSearch(){
           );
         });
         
-        var resultHtml = $('<div class="panel panel-default">')
-          .append('<div class="panel-heading">' + result.names[0] + '</div>')
+        var names = $('<div class="panel-heading">');
+        $.each(result.names, function(i, name){
+          names.append('<div class="result-name">' + name + '</div>');
+        });
+        
+        var resultCard = $('<div class="panel panel-default">')
+          .append(names)
           .append(buttonList);
           
-        resultsContainer.append(resultHtml);
+        resultsContainer.append(resultCard);
       });
     }
     

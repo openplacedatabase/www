@@ -25,8 +25,19 @@
 
 #search-results {
   margin-top: 10px;
+  position: absolute;
+  bottom: 0;
+  top: 45px;
+  right: 0px;
+  left: 5px;
+  overflow: auto;
 }
 
 #search-results .panel {
   margin-bottom: 10px;
+  margin-right: 5px;
+}
+
+.result-name:not(:first-child) {
+  margin-top: 10px;
 }
