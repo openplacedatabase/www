@@ -67,10 +67,15 @@ function placeSearch(){
         var buttonList = $('<div class="panel-body">');
         $.each(result.geojson, function(i, geo){
           buttonList.append(
-            $('<div class="col-sm-4 btn-col"><button class="btn btn-sm btn-white">' + geo.from + '-' + geo.to + '</button></div>')
-              .click(function(){
-                getGeoJSON(result.id, geo.id);
-              })
+            $('<div class="col-sm-4 btn-col">').append(
+              $('<button class="btn btn-sm btn-white">' + geo.from + '-' + geo.to + '</button>')
+                .click(function(){
+                  $('.btn-primary', resultsContainer).addClass('btn-white').removeClass('btn-primary');
+                  $(this).addClass('btn-primary').removeClass('btn-white');
+                  getGeoJSON(result.id, geo.id);
+                  
+                })
+            )
           );
         });
         
