@@ -59,24 +59,33 @@ function initializeMap(){
 function placeSearch(){
   var resultsContainer = $('#search-results').html('');
   $.get('/api/v0/search/places', {s: $('#search-input').val()}).done(function(searchResults){
-    $.each(searchResults.data, function(i, result){
-      
-      var buttonList = $('<div class="panel-body">');
-      $.each(result.geojson, function(i, geo){
-        buttonList.append(
-          $('<button class="btn btn-sm btn-white">' + geo.from + '-' + geo.to + '</button>')
-            .click(function(){
-              getGeoJSON(result.id, geo.id);
-            })
-        );
-      });
-      
-      var resultHtml = $('<div class="panel panel-default">')
-        .append('<div class="panel-heading">' + result.names[0] + '</div>')
-        .append(buttonList);
+    
+    // Display the results if there are any
+    if(searchResults.data.length) {
+      $.each(searchResults.data, function(i, result){
         
-      resultsContainer.append(resultHtml);
-    });
+        var buttonList = $('<div class="panel-body">');
+        $.each(result.geojson, function(i, geo){
+          buttonList.append(
+            $('<button class="btn btn-sm btn-white">' + geo.from + '-' + geo.to + '</button>')
+              .click(function(){
+                getGeoJSON(result.id, geo.id);
+              })
+          );
+        });
+        
+        var resultHtml = $('<div class="panel panel-default">')
+          .append('<div class="panel-heading">' + result.names[0] + '</div>')
+          .append(buttonList);
+          
+        resultsContainer.append(resultHtml);
+      });
+    }
+    
+    // Display message when there are no results
+    else {
+      resultsContainer.append('<div class="alert alert-info">No results match your search.</div>');
+    }
   });
 };
 
