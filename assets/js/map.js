@@ -45,6 +45,8 @@ $(document).ready(function(){
       placeSearch();
     }
   });
+  
+  processHashChange();
 
 });
 
