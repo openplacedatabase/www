@@ -1,3 +1,28 @@
+var map,
+    googleShape,
+    mapOptions = {
+      center: new google.maps.LatLng(54.5,-5),
+      zoom: 5,
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      panControl: false,
+      zoomControl: true,
+      zoomControlOptions: {
+        style: google.maps.ZoomControlStyle.SMALL,
+        position: google.maps.ControlPosition.RIGHT_BOTTOM
+      },
+      mapTypeControl: false,
+      scaleControl: true,
+      streetViewControl: false,
+      overviewMapControl: false
+    },
+    googleShapeOptions = {
+      "strokeColor": "#FF7800",
+      "strokeOpacity": 1,
+      "strokeWeight": 2,
+      "fillColor": "#46461F",
+      "fillOpacity": 0.25
+    };
+
 $(document).ready(function(){
 
   // Check for google api key
@@ -25,22 +50,7 @@ $(document).ready(function(){
  * Setup the map
  */
 function initializeMap(){
-  var mapOptions = {
-    center: new google.maps.LatLng(54.5,-5),
-    zoom: 5,
-    mapTypeId: google.maps.MapTypeId.ROADMAP,
-    panControl: false,
-    zoomControl: true,
-    zoomControlOptions: {
-      style: google.maps.ZoomControlStyle.SMALL,
-      position: google.maps.ControlPosition.RIGHT_BOTTOM
-    },
-    mapTypeControl: false,
-    scaleControl: true,
-    streetViewControl: false,
-    overviewMapControl: false
-  };
-  var map = new google.maps.Map(document.getElementById("map"), mapOptions);
+  map = new google.maps.Map(document.getElementById("map"), mapOptions);
 };
 
 /**
@@ -74,5 +84,20 @@ function placeSearch(){
  * Get the geojson
  */
 function getGeoJSON(placeId, geoId){
-  console.log('Getting geojson', placeId, geoId);
+  
+  // Remove a shape if there's one currently on the map
+  if(googleShape) {
+    googleShape.setMap(null);
+  }
+  
+  // Get the new shape
+  $.get('/api/v0/place/' + placeId + '/' + geoId).done(function(result){
+    googleShape = new GeoJSON(result.data, googleShapeOptions);
+    if(googleShape.error) {
+      console.error(googleShape.error);
+    } else {
+      googleShape.setMap(map);
+    }
+  });
+  
 };

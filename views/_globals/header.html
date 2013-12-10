@@ -8,7 +8,7 @@
     <link href="/assets/css/site.css" rel="stylesheet" media="screen">
     <% if(typeof css !== 'undefined' && css.length){ %>
       <% for(var i=0; i<css.length; i++) { %>
-      <link href="/assets/css/<%= css[i] %>" rel="stylesheet" type="text/css">
+      <link href="<%= css[i] %>" rel="stylesheet" type="text/css">
       <% } %>
     <% } %>
   </head>
