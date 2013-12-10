@@ -1,0 +1,1 @@
+Download the latest data snapshot from (here)[http://www.openplacedatabase.org/download] and extract it into this folder.
