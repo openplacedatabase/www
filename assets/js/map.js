@@ -1,5 +1,5 @@
 var map,
-    googleShape,
+    googleShapes = [],
     mapOptions = {
       center: new google.maps.LatLng(20,-10),
       zoom: 3,
@@ -99,23 +99,38 @@ function placeSearch(){
  */
 function getGeoJSON(placeId, geoId){
   
-  // Remove a shape if there's one currently on the map
-  if(googleShape) {
-    googleShape.setMap(null);
+  // Remove the shapes if there are some currently on the map
+  if(googleShapes.length > 0) {
+    $.each(googleShapes, function(i, shape){
+      shape.setMap(null);
+    });
   }
   
   // Get the new shape
   $.get('/api/v0/place/' + placeId + '/' + geoId).done(function(result){
-    googleShape = new GeoJSON(result.data, googleShapeOptions);
-    if(googleShape.error) {
-      console.error(googleShape.error);
+    
+    // Convert the geojson to a google maps object
+    googleShapes = new GeoJSON(result.data, googleShapeOptions);
+    
+    // Handle possible conversion errors
+    if(googleShapes.error) {
+      console.error(googleShapes.error);
     } else {
       
-      // Add shape to the map
-      googleShape.setMap(map);
+      // Put single polygons into an array
+      if(!$.isArray(googleShapes)) {
+        googleShapes = [ googleShapes ];
+      }
       
-      // Move and zoom to fit the shape
-      map.fitBounds(googleShape.getBounds());
+      // Add the shapes to the map. 
+      // Move and zoom to fit the shape.
+      var bounds = new google.maps.LatLngBounds();
+      $.each(googleShapes, function(i, shape){
+        shape.setMap(map);
+        bounds.union(shape.getBounds());
+      });
+      map.fitBounds(bounds);
+      
     }
   });
   
