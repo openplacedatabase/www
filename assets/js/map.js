@@ -44,10 +44,35 @@ function initializeMap(){
 };
 
 /**
- * Perform a place search
+ * Perform a place search and display results
  */
 function placeSearch(){
+  var resultsContainer = $('#search-results').html('');
   $.get('/api/v0/search/places', {s: $('#search-input').val()}).done(function(searchResults){
-    console.log(searchResults);
+    $.each(searchResults.data, function(i, result){
+      
+      var buttonList = $('<div class="panel-body">');
+      $.each(result.geojson, function(i, geo){
+        buttonList.append(
+          $('<button class="btn btn-sm btn-white">' + geo.from + '-' + geo.to + '</button>')
+            .click(function(){
+              getGeoJSON(result.id, geo.id);
+            })
+        );
+      });
+      
+      var resultHtml = $('<div class="panel panel-default">')
+        .append('<div class="panel-heading">' + result.names[0] + '</div>')
+        .append(buttonList);
+        
+      resultsContainer.append(resultHtml);
+    });
   });
+};
+
+/**
+ * Get the geojson
+ */
+function getGeoJSON(placeId, geoId){
+  console.log('Getting geojson', placeId, geoId);
 };

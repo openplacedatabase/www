@@ -1,4 +1,3 @@
-
 #content {
   position: absolute;
   top: 52px;
@@ -22,4 +21,12 @@
   bottom: 0;
   left: 350px;
   right: 0;
+}
+
+#search-results {
+  margin-top: 10px;
+}
+
+#search-results .panel {
+  margin-bottom: 10px;
 }
