@@ -67,7 +67,7 @@ function placeSearch(){
         var buttonList = $('<div class="panel-body">');
         $.each(result.geojson, function(i, geo){
           buttonList.append(
-            $('<button class="btn btn-sm btn-white">' + geo.from + '-' + geo.to + '</button>')
+            $('<div class="col-sm-4 btn-col"><button class="btn btn-sm btn-white">' + geo.from + '-' + geo.to + '</button></div>')
               .click(function(){
                 getGeoJSON(result.id, geo.id);
               })
