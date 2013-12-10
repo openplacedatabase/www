@@ -23,6 +23,8 @@ var map,
       "fillOpacity": 0.25
     };
 
+window.onhashchange = processHashChange;
+    
 $(document).ready(function(){
 
   // Check for google api key
@@ -54,11 +56,40 @@ function initializeMap(){
 };
 
 /**
+ * Process the new hash
+ */
+function processHashChange(){
+  // Remove the #
+  var searchString = getHash();
+  
+  // Initiate a search
+  $('#search-input').val(searchString);
+  $('#search-button').click();
+};
+
+/**
+ * Get hash search value
+ */
+function getHash(){
+  return window.location.hash.slice(1);
+};
+
+/**
  * Perform a place search and display results
  */
 function placeSearch(){
+  
+  var searchString = $('#search-input').val();
+  
+  // Update the hash if the search is different
+  if(searchString !== getHash()){
+    window.location.hash = '#' + searchString;
+  }
+  
+  // Clear current results
   var resultsContainer = $('#search-results').html('');
-  $.get('/api/v0/search/places', {s: $('#search-input').val()}).done(function(searchResults){
+  
+  $.get('/api/v0/search/places', {s: searchString}).done(function(searchResults){
     
     // Display the results if there are any
     if(searchResults.data.length) {
