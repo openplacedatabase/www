@@ -184,7 +184,7 @@ function placeSearch(searchString, searchOffset, infiniteScroll, callback){
         $.each(result.geojson, function(i, geo){
           buttonList.append(
             $('<div class="col-sm-4 btn-col">').append(
-              $('<button class="btn btn-sm btn-white">' + geo.from + '-' + geo.to + '</button>')
+              $('<button class="btn btn-sm btn-white">' + geo.from.substr(0,4) + '-' + geo.to.substr(0,4) + '</button>')
                 .attr('id', 'btn_' + result.id + '_' + geo.id)
                 .click(function(){
                   updateSelection(result.id, geo.id);
@@ -209,12 +209,10 @@ function placeSearch(searchString, searchOffset, infiniteScroll, callback){
       if(response.data.total > searchOffset + searchCount){
         
         resultsContainer.scroll(function(){
+        
           // Check to see if we've scrolled to the bottom
           if($(this)[0].scrollHeight - $(this).scrollTop() == $(this).outerHeight()){
           
-            // TODO: show loading whirlly gig
-            console.log('loading more...');
-            
             // Get next page of results
             placeSearch(searchString, searchOffset + searchCount, true);
           }
