@@ -62,9 +62,6 @@ module.exports = function(app){
         res.status(500);
         return res.json(apiReturn(false, 500,"Internal Error"));
       }
-      if(esResults.hits.total < 1) {
-        return res.json(apiReturn({}));
-      }
       
       //search was good and we have results.
       var ret = {total:esResults.hits.total,results:[]};
