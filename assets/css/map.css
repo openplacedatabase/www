@@ -1,3 +1,7 @@
+.navbar .container {
+  margin: 0;
+}
+
 #content {
   position: absolute;
   top: 52px;
