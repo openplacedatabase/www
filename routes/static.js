@@ -16,10 +16,6 @@ module.exports = function(app){
     res.render('contribute');
   });
   
-  app.get('/donate', function(req, res){
-    res.render('donate');
-  });
-  
   app.get('/download', function(req, res){
     res.render('download');
   });
