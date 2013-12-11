@@ -1,7 +1,22 @@
 <% include ../_globals/header.html %>
 
 <div class="container">
-  About Us
+  <h1>What is the Open Place Database?</h1>
+  <p>
+  A database of places, their current and historical names, and their boundaries over time.
+  </p>
+  <h1>Why is it needed?</h1>
+  <p>
+  While there are several very good sources for current places (Geonames) and boundaries (OSM), there is no global collection of historical places and boundaries with their changes over time that are available under a similar license.
+  </p>
+  <h1>What's inside?</h1>
+  <p>
+  A collection of places, each with a list of fully qualified names, the dates that the place existed, and a list of geojson objects representing the changing boundaries over time. 
+  </p>
+  <h1>How does it work?</h1>
+  <p>
+  The data itself is stored as individual json and geojson files in a directory structure. This makes it easy to work with if you need to extract information. Also available is the code for this site, which includes a viewer, a map editor, and an API for editing and querying places. For more information visit our <a href="https://github.com/openplacedatabase/www">Github Repository</a>
+  </p>
 </div>
 
 <% include ../_globals/footer.html %>
