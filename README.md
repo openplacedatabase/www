@@ -19,7 +19,7 @@ TODO
 1. Make the following environment variables available:
 ````
 // Only required if you want to use a google map
-OPD_GOOGLE_MAPS_KEY="<Your google maps key>
+OPD_GOOGLE_API_KEY="<Your google maps key>
 ````
 
 1. [Download](http://www.openplacedatabase.org/download) the latest data snapshot and extract it into `<root_dir>/data`.
