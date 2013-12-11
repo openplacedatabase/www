@@ -1,7 +1,10 @@
 var map,
+    searchInput,
+    searchCount = 10,
+    loadBar,
     state = {
       search: null,
-      page: null,
+      offset: null,
       placeId: null,
       geoId: null,
       shapes: []
@@ -46,11 +49,13 @@ var map,
     };
 
 window.onhashchange = function(){
-  console.log('hash change event');
   processHashChange();
 };
     
 $(document).ready(function(){
+
+  searchInput = $('#search-input');
+  loadBar = $('#load-bar');
 
   // Check for google api key
   if(GOOGLE_API_KEY) {
@@ -63,11 +68,15 @@ $(document).ready(function(){
   
   // Perform a search when the search button is clicked or the
   // enter key is pressed when the search input has focus
-  $('#search-button').click(placeSearch);
-  $('#search-input').keypress(function(e) {
+  
+  $('#search-button').click(function(){
+    placeSearch(searchInput.val(), 0, false);
+  });
+  
+  searchInput.keypress(function(e) {
     // Enter pressed
     if(e.which == 13) {
-      placeSearch();
+      placeSearch(searchInput.val(), 0, false);
     }
   });
   
@@ -86,7 +95,6 @@ function initializeMap(){
  * Process the new hash
  */
 function processHashChange(){
-  console.log('processing hash change');
   
   // Remove the #
   var hashParts = getHash(),
@@ -97,9 +105,9 @@ function processHashChange(){
   // Initiate a search if the new hash doesn't match the current input value
   if(searchString.length > 0 && searchString !== state.search) {
   
-    $('#search-input').val(searchString);
+    searchInput.val(searchString);
     
-    placeSearch(function(){
+    placeSearch(searchString, 0, false, function(){
       
       // Display selected geoJson if it's not already displayed.
       // We wait until the search returns so that we can highlight
@@ -128,25 +136,49 @@ function getHash(){
 /**
  * Perform a place search and display results
  */
-function placeSearch(callback){
+function placeSearch(searchString, searchOffset, infiniteScroll, callback){
   
-  console.log('searching...');
-  
-  var searchString = state.search = $('#search-input').val();
+  state.search = searchString;
   
   // Update the hash if the search is different
   if(searchString !== getHash()[0]){
     window.location.hash = '#' + searchString;
   }
   
-  // Clear current results
-  var resultsContainer = $('#search-results').html('');
+  var resultsContainer = $('#search-results');
   
-  $.get('/api/v0/search/places', {s: searchString}).done(function(searchResults){
+  // Remove previous infinite scroll handlers
+  resultsContainer.off('scroll')
+  
+  // Clear current results if we're doing a new search
+  if(!infiniteScroll){
+    resultsContainer.html('');
+  }
+  
+  // Show loading bar
+  var width = 30;
+  loadBar.width(width + '%');
+  var loading = setInterval(function(){
+    loadBar.width((++width) % 100 + '%');
+  }, 10);
+  
+  $.get('/api/v0/search/places', {
+    s: searchString,
+    count: searchCount,
+    offset: searchOffset
+  }).done(function(response){
+    
+    // Finish loading bar by stretching to end
+    // and fading out.
+    clearInterval(loading);
+    loadBar.width('100%');
+    setTimeout(function(){
+      loadBar.width('0%');
+    }, 500);
     
     // Display the results if there are any
-    if(searchResults.data.results.length) {
-      $.each(searchResults.data.results, function(i, result){
+    if(response.data.results.length) {
+      $.each(response.data.results, function(i, result){
         
         var buttonList = $('<div class="panel-body">');
         $.each(result.geojson, function(i, geo){
@@ -172,10 +204,32 @@ function placeSearch(callback){
           
         resultsContainer.append(resultCard);
       });
+      
+      // Enable infinite scrolling if there's more data
+      if(response.data.total > searchOffset + searchCount){
+        
+        resultsContainer.scroll(function(){
+          // Check to see if we've scrolled to the bottom
+          if($(this)[0].scrollHeight - $(this).scrollTop() == $(this).outerHeight()){
+          
+            // TODO: show loading whirlly gig
+            console.log('loading more...');
+            
+            // Get next page of results
+            placeSearch(searchString, searchOffset + searchCount, true);
+          }
+        });
+        
+      }
+      
+      // We're at the end
+      else {
+        resultsContainer.append('<p class="text-muted text-center">End of results.</p>');
+      }
     }
     
     // Display message when there are no results
-    else {
+    else if(!infiniteScroll) {
       resultsContainer.append('<div class="alert alert-info">No results match your search.</div>');
     }
     
@@ -189,7 +243,6 @@ function placeSearch(callback){
  * Update DOM and get new shape to display
  */
 function updateSelection(placeId, geoId){
-  console.log('updateSelection');
   if(state.placeId !== placeId || state.geoId !== geoId){
     
     // Save selection
@@ -210,12 +263,8 @@ function updateSelection(placeId, geoId){
       $('#btn_' + placeId + '_' + geoId).addClass('btn-primary').removeClass('btn-white');
       
       // Update url hash    
-      window.location.hash = '#' + getHash()[0] + '/' + placeId + '/' + geoId;
+      window.location.hash = '#' + state.search + '/' + state.placeId + '/' + state.geoId;
     }
-  } else {
-    console.log('no selection to update');
-    console.log('placeId:', state.placeId, placeId);
-    console.log('geoId:', state.geoId, geoId);
   }
 };
 
@@ -242,8 +291,6 @@ function getGeoJSON(placeId, geoId){
       
       state.shapes = newShapes;
       
-      console.log('adding ' + newShapes.length + ' shapes');
-      
       // Add the shapes to the map. 
       // Move and zoom to fit the shape.
       var bounds = new google.maps.LatLngBounds();
@@ -263,7 +310,6 @@ function getGeoJSON(placeId, geoId){
  */
 function clearShapes(){
   if(state.shapes.length > 0) {
-    console.log('removing ' + state.shapes.length + ' shapes');
     $.each(state.shapes, function(i, shape){
       shape.setMap(null);
     });
