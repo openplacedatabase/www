@@ -11,7 +11,7 @@ module.exports = function(app){
       ],
       google_key: process.env.OPD_GOOGLE_API_KEY
     };
-    res.render('map/map', data);
+    res.render('map', data);
   });
 
 };
