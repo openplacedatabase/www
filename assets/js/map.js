@@ -1,8 +1,10 @@
 var map,
-    googleShapes = [],
-    selection = {
+    state = {
+      search: null,
+      page: null,
       placeId: null,
-      geoId: null
+      geoId: null,
+      shapes: []
     },
     mapOptions = {
       center: new google.maps.LatLng(20,-10),
@@ -93,7 +95,8 @@ function processHashChange(){
       geoId = hashParts[2];
   
   // Initiate a search if the new hash doesn't match the current input value
-  if(searchString.length > 0 && searchString !== $('#search-input').val()) {
+  if(searchString.length > 0 && searchString !== state.search) {
+  
     $('#search-input').val(searchString);
     
     placeSearch(function(){
@@ -129,7 +132,7 @@ function placeSearch(callback){
   
   console.log('searching...');
   
-  var searchString = $('#search-input').val();
+  var searchString = state.search = $('#search-input').val();
   
   // Update the hash if the search is different
   if(searchString !== getHash()[0]){
@@ -142,8 +145,8 @@ function placeSearch(callback){
   $.get('/api/v0/search/places', {s: searchString}).done(function(searchResults){
     
     // Display the results if there are any
-    if(searchResults.data.length) {
-      $.each(searchResults.data, function(i, result){
+    if(searchResults.data.results.length) {
+      $.each(searchResults.data.results, function(i, result){
         
         var buttonList = $('<div class="panel-body">');
         $.each(result.geojson, function(i, geo){
@@ -176,7 +179,9 @@ function placeSearch(callback){
       resultsContainer.append('<div class="alert alert-info">No results match your search.</div>');
     }
     
-    callback();
+    if(callback){
+      callback();
+    }
   });
 };
 
@@ -185,11 +190,11 @@ function placeSearch(callback){
  */
 function updateSelection(placeId, geoId){
   console.log('updateSelection');
-  if(selection.placeId !== placeId || selection.geoId !== geoId){
+  if(state.placeId !== placeId || state.geoId !== geoId){
     
     // Save selection
-    selection.placeId = placeId;
-    selection.geoId = geoId;
+    state.placeId = placeId;
+    state.geoId = geoId;
     
     // Remove highlight from previous selection
     $('#search-results .btn-primary').addClass('btn-white').removeClass('btn-primary');
@@ -209,8 +214,8 @@ function updateSelection(placeId, geoId){
     }
   } else {
     console.log('no selection to update');
-    console.log('placeId:', selection.placeId, placeId);
-    console.log('geoId:', selection.geoId, geoId);
+    console.log('placeId:', state.placeId, placeId);
+    console.log('geoId:', state.geoId, geoId);
   }
 };
 
@@ -223,24 +228,26 @@ function getGeoJSON(placeId, geoId){
   $.get('/api/v0/place/' + placeId + '/' + geoId).done(function(result){
     
     // Convert the geojson to a google maps object
-    googleShapes = new GeoJSON(result.data, googleShapeOptions);
+    var newShapes = new GeoJSON(result.data, googleShapeOptions);
     
     // Handle possible conversion errors
-    if(googleShapes.error) {
-      console.error(googleShapes.error);
+    if(newShapes.error) {
+      console.error(newShapes.error);
     } else {
       
       // Put single polygons into an array
-      if(!$.isArray(googleShapes)) {
-        googleShapes = [ googleShapes ];
+      if(!$.isArray(newShapes)) {
+        newShapes = [ newShapes ];
       }
       
-      console.log('adding ' + googleShapes.length + ' shapes');
+      state.shapes = newShapes;
+      
+      console.log('adding ' + newShapes.length + ' shapes');
       
       // Add the shapes to the map. 
       // Move and zoom to fit the shape.
       var bounds = new google.maps.LatLngBounds();
-      $.each(googleShapes, function(i, shape){
+      $.each(newShapes, function(i, shape){
         shape.setMap(map);
         bounds.union(shape.getBounds());
       });
@@ -255,9 +262,9 @@ function getGeoJSON(placeId, geoId){
  * Remove all shapes from the map
  */
 function clearShapes(){
-  if(googleShapes.length > 0) {
-    console.log('removing ' + googleShapes.length + ' shapes');
-    $.each(googleShapes, function(i, shape){
+  if(state.shapes.length > 0) {
+    console.log('removing ' + state.shapes.length + ' shapes');
+    $.each(state.shapes, function(i, shape){
       shape.setMap(null);
     });
   }
