@@ -32,15 +32,15 @@ var map,
           stylers: [
             { visibility: "off" }
           ]
-        }
+        }     
       ]
     },
     googleShapeOptions = {
-      "strokeColor": "#FF7800",
+      "strokeColor": "#228b22",
       "strokeOpacity": 1,
-      "strokeWeight": 2,
-      "fillColor": "#46461F",
-      "fillOpacity": 0.25
+      "strokeWeight": 3,
+      "fillColor": "#228b22",
+      "fillOpacity": 0.3
     };
 
 window.onhashchange = function(){
