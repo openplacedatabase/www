@@ -1,5 +1,9 @@
 var map,
     googleShapes = [],
+    selection = {
+      placeId: null,
+      geoId: null
+    },
     mapOptions = {
       center: new google.maps.LatLng(20,-10),
       zoom: 3,
@@ -13,7 +17,23 @@ var map,
       mapTypeControl: false,
       scaleControl: true,
       streetViewControl: false,
-      overviewMapControl: false
+      overviewMapControl: false,
+      styles: [
+        {
+          featureType: "road",
+          elementType: "geometry",
+          stylers: [
+            { visibility: "simplified" }
+          ]
+        },
+        {
+          featureType: "poi",
+          elementType: "labels",
+          stylers: [
+            { visibility: "off" }
+          ]
+        }
+      ]
     },
     googleShapeOptions = {
       "strokeColor": "#FF7800",
@@ -67,33 +87,52 @@ function processHashChange(){
   console.log('processing hash change');
   
   // Remove the #
-  var searchString = getHash();
+  var hashParts = getHash(),
+      searchString = hashParts[0],
+      placeId = hashParts[1],
+      geoId = hashParts[2];
   
   // Initiate a search if the new hash doesn't match the current input value
   if(searchString.length > 0 && searchString !== $('#search-input').val()) {
     $('#search-input').val(searchString);
-    $('#search-button').click();
+    
+    placeSearch(function(){
+      
+      // Display selected geoJson if it's not already displayed.
+      // We wait until the search returns so that we can highlight
+      // the appropriate button.
+      updateSelection(placeId, geoId);
+      
+    });
   }
+  
+  // If we don't initiate a new search, we still might want to change
+  // selection. For example, we might still be looking at results for
+  // "Virginia" but are just changing which shape is being displayed.
+  else {
+    updateSelection(placeId, geoId);
+  }
+
 };
 
 /**
  * Get hash search value
  */
 function getHash(){
-  return window.location.hash.slice(1);
+  return window.location.hash.slice(1).split('/');
 };
 
 /**
  * Perform a place search and display results
  */
-function placeSearch(){
+function placeSearch(callback){
   
   console.log('searching...');
   
   var searchString = $('#search-input').val();
   
   // Update the hash if the search is different
-  if(searchString !== getHash()){
+  if(searchString !== getHash()[0]){
     window.location.hash = '#' + searchString;
   }
   
@@ -111,11 +150,9 @@ function placeSearch(){
           buttonList.append(
             $('<div class="col-sm-4 btn-col">').append(
               $('<button class="btn btn-sm btn-white">' + geo.from + '-' + geo.to + '</button>')
+                .attr('id', 'btn_' + result.id + '_' + geo.id)
                 .click(function(){
-                  $('.btn-primary', resultsContainer).addClass('btn-white').removeClass('btn-primary');
-                  $(this).addClass('btn-primary').removeClass('btn-white');
-                  getGeoJSON(result.id, geo.id);
-                  
+                  updateSelection(result.id, geo.id);
                 })
             )
           );
@@ -138,20 +175,49 @@ function placeSearch(){
     else {
       resultsContainer.append('<div class="alert alert-info">No results match your search.</div>');
     }
+    
+    callback();
   });
+};
+
+/**
+ * Update DOM and get new shape to display
+ */
+function updateSelection(placeId, geoId){
+  console.log('updateSelection');
+  if(selection.placeId !== placeId || selection.geoId !== geoId){
+    
+    // Save selection
+    selection.placeId = placeId;
+    selection.geoId = geoId;
+    
+    // Remove highlight from previous selection
+    $('#search-results .btn-primary').addClass('btn-white').removeClass('btn-primary');
+    
+    clearShapes();
+    
+    if(placeId && geoId) {
+    
+      // Get shape
+      getGeoJSON(placeId, geoId);
+      
+      // Add highlight to new selection
+      $('#btn_' + placeId + '_' + geoId).addClass('btn-primary').removeClass('btn-white');
+      
+      // Update url hash    
+      window.location.hash = '#' + getHash()[0] + '/' + placeId + '/' + geoId;
+    }
+  } else {
+    console.log('no selection to update');
+    console.log('placeId:', selection.placeId, placeId);
+    console.log('geoId:', selection.geoId, geoId);
+  }
 };
 
 /**
  * Get the geojson
  */
 function getGeoJSON(placeId, geoId){
-  
-  // Remove the shapes if there are some currently on the map
-  if(googleShapes.length > 0) {
-    $.each(googleShapes, function(i, shape){
-      shape.setMap(null);
-    });
-  }
   
   // Get the new shape
   $.get('/api/v0/place/' + placeId + '/' + geoId).done(function(result){
@@ -169,6 +235,8 @@ function getGeoJSON(placeId, geoId){
         googleShapes = [ googleShapes ];
       }
       
+      console.log('adding ' + googleShapes.length + ' shapes');
+      
       // Add the shapes to the map. 
       // Move and zoom to fit the shape.
       var bounds = new google.maps.LatLngBounds();
@@ -181,6 +249,18 @@ function getGeoJSON(placeId, geoId){
     }
   });
   
+};
+
+/**
+ * Remove all shapes from the map
+ */
+function clearShapes(){
+  if(googleShapes.length > 0) {
+    console.log('removing ' + googleShapes.length + ' shapes');
+    $.each(googleShapes, function(i, shape){
+      shape.setMap(null);
+    });
+  }
 };
 
 /**
