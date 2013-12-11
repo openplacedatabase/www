@@ -16,6 +16,31 @@ module.exports = function(app){
       return res.json(apiReturn(false, 400,"Parameter q or s is required"));
     }
     
+    if(!req.query.q && !req.query.s) {
+      res.status(400);
+      return res.json(apiReturn(false, 400,"Parameter q or s is required"));
+    }
+    
+    if(req.query.count) {
+      if( _.isNaN(req.query.count) || req.query.count < 1 || req.query.count > 100) {
+        res.status(400);
+        return res.json(apiReturn(false, 400,"Parameter count must be a number and between 1 (inclusive) and 100 (inclusive)"));
+      }
+    } else {
+      req.query.count = 10;
+    }
+    
+    if(req.query.offset) {
+      req.query.offset = parseInt(req.query.offset);
+      if( _.isNaN(req.query.offset) || req.query.offset < 0) {
+        res.status(400);
+        return res.json(apiReturn(false, 400,"Parameter offset must be a number and greater than 0 (inclusive)"));
+      }
+    } else {
+      req.query.offset = 0;
+    }
+    
+    
     var query;
     
     if(req.query.q) {
@@ -27,7 +52,7 @@ module.exports = function(app){
     //setup query
     var qsQuery = ejs.QueryStringQuery(query);
     qsQuery.defaultField('names');
-    var r = ejs.Request().indices('places').query(qsQuery);
+    var r = ejs.Request().from(req.query.offset).size(req.query.count).indices('places').query(qsQuery);
     
     //call query
     r.doSearch(function(esResults) {
@@ -42,9 +67,9 @@ module.exports = function(app){
       }
       
       //search was good and we have results.
-      var ret = [];
+      var ret = {total:esResults.hits.total,results:[]};
       for(x in esResults.hits.hits) {
-        ret.push(esResults.hits.hits[x]._source);
+        ret.results.push(esResults.hits.hits[x]._source);
       }
       
       return res.json(apiReturn(ret));
