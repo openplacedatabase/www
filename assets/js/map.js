@@ -23,7 +23,10 @@ var map,
       "fillOpacity": 0.25
     };
 
-window.onhashchange = processHashChange;
+window.onhashchange = function(){
+  console.log('hash change event');
+  processHashChange();
+};
     
 $(document).ready(function(){
 
@@ -61,12 +64,16 @@ function initializeMap(){
  * Process the new hash
  */
 function processHashChange(){
+  console.log('processing hash change');
+  
   // Remove the #
   var searchString = getHash();
   
-  // Initiate a search
-  $('#search-input').val(searchString);
-  $('#search-button').click();
+  // Initiate a search if the new hash doesn't match the current input value
+  if(searchString.length > 0 && searchString !== $('#search-input').val()) {
+    $('#search-input').val(searchString);
+    $('#search-button').click();
+  }
 };
 
 /**
@@ -80,6 +87,8 @@ function getHash(){
  * Perform a place search and display results
  */
 function placeSearch(){
+  
+  console.log('searching...');
   
   var searchString = $('#search-input').val();
   
