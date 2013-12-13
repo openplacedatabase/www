@@ -46,7 +46,7 @@ module.exports = function(app){
     if(req.query.q) {
       query = req.query.q;
     } else {
-      query = 'names:'+req.query.s+'*';
+      query = 'names:'+req.query.s;
     }
     
     //setup query
