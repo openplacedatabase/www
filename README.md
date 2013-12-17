@@ -45,21 +45,7 @@ curl -XPUT 'localhost:9200/places/' -d '{}'
 
     WARNING - Make sure to replace `<root_dir>` with the path to the root of your cloned repo:
 ````
-curl -XPUT 'localhost:9200/_river/places/_meta' -d '
-{
-  "type": "fs",
-  "fs": {
-    "url": "<root_dir>/data",
-    "json_support" : true,
-    "update_rate": 900000,
-    "includes": "*\\.json$"
-  },
-  "index": {
-    "index": "places",
-    "type": "place",
-    "bulk_size": 50
-  }
-}'
+curl -XPUT 'localhost:9200/_river/places/_meta' -d '{"type":"fs","fs":{"url":"<root_dir>/data","json_support":true,"update_rate":900000,"includes":"*\\.json$"},"index":{"index":"places","type":"place","bulk_size":50}}'
 ````
 
 1. Run the Open Place Database by typing `node <root_dir>/app.js`. It will bind to port 8080 by default.
