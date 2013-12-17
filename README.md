@@ -24,7 +24,17 @@ OPD_GOOGLE_API_KEY="<Your google maps key>
 
 1. [Download](http://www.openplacedatabase.org/download) the latest data snapshot and extract it into `<root_dir>/data`.
 
-1. Install [elasticsearch](http://www.elasticsearch.org/) and the [Filesystem River Plugin](https://github.com/dadoonet/fsriver). You may also want to (optionally) install the [elasticsearch-head Plugin](http://mobz.github.io/elasticsearch-head/). Make sure to restart elasticsearch after installing the plugins.
+1. Install java, [elasticsearch](http://www.elasticsearch.org/) and the [Filesystem River Plugin](https://github.com/dadoonet/fsriver). You may also want to (optionally) install the [elasticsearch-head Plugin](http://mobz.github.io/elasticsearch-head/) to view and manage indexes using your webbrowser. Make sure to restart elasticsearch after installing the plugins.
+````
+#example for Ubuntu
+sudo apt-get install openjdk-7-jre
+wget <link to elasticsearch >
+sudo dpkg -i <elasticsearch.deb file>
+cd /usr/share/elasticsearch/
+sudo ./bin/plugin -install fr.pilato.elasticsearch.river/fsriver/0.4.0-SNAPSHOT
+sudo ./bin/plugin -install mobz/elasticsearch-head
+sudo service elasticsearch restart
+````
 
 1. Create an index called `places` by running the following command on your machine (assuming you have curl installed):
 ````
