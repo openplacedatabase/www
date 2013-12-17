@@ -50,6 +50,10 @@
   margin-right: 5px;
 }
 
+#search-results .panel-heading {
+  overflow: auto;
+}
+
 #search-results .panel-body {
   padding: 15px 0;
 }
@@ -57,6 +61,11 @@
 #search-results .panel-body .col-sm-4 {
   padding: 0 10px;
   text-align: center;
+}
+
+.result-name {
+  float: left;
+  clear: left;
 }
 
 .result-name:not(:first-child) {

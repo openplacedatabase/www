@@ -1,0 +1,18 @@
+<% include _globals/header.html %>
+
+<div id="sidebar">
+
+  <div class="col-sm-6 col-sm-offset-3 text-center">
+    <h3 class="text-muted">Loading</h3>
+    <img src="/assets/img/ajax-loader-blue-on-white.gif" />
+  </div>
+  
+</div>
+
+<div id="map"></div>
+
+<script>
+  var GOOGLE_API_KEY = "<%= google_key %>";
+</script>
+
+<% include _globals/js_footer.html %>
