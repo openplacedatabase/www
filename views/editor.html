@@ -11,6 +11,23 @@
 
 <div id="map"></div>
 
+<div id="map-controls">
+
+  <div class="btn-group" data-toggle="buttons">
+    <label id="select-mode-button" class="btn btn-white btn-sm">
+      <input type="radio" name="mode" /><span class="glyphicon glyphicon-move"></span>
+    </label>
+    <label id="polygon-mode-button" class="btn btn-white btn-sm">
+      <input type="radio" name="mode" /><span class="glyphicon glyphicon-pencil"></span>
+    </label>
+  </div>
+  
+  <button id="delete-shape-button" type="button" class="btn btn-white btn-sm">
+    <span class="glyphicon glyphicon-remove"></span>
+  </button>
+
+</div>
+
 <script>
   var GOOGLE_API_KEY = "<%= google_key %>";
 </script>

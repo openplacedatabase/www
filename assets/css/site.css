@@ -8,6 +8,14 @@
   filter: none;
 }
 
+.btn-white.active, 
+.btn-white:hover, 
+.btn-white:active, 
+.btn-white:focus, 
+.btn-white:visited {
+  background-color: #f0f0f0;
+}
+
 .btn-white, 
 .btn-white:hover, 
 .btn-white:active, 

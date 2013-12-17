@@ -43,7 +43,6 @@ var sidebar,
     },
     drawingControlOptions = {
       drawingMode: null,
-      drawingControl: true,
       drawingControlOptions: {
         position: google.maps.ControlPosition.TOP_LEFT,
         drawingModes: [
@@ -81,14 +80,51 @@ function initialize(){
   drawingManager = new google.maps.drawing.DrawingManager(drawingControlOptions);
   drawingManager.setMap(map);
   
-  // Remove the # from the hash
+  // Remove the # from the url hash
   var placeId = window.location.hash.slice(1);
   
+  // Load specified place
   if(placeId) {
     getPlace(placeId);
   } else {
     sidebar.html('<div class="alert alert-danger">No place was selected for editing. Return to the <a href="/map">search</a> page to select a place for editing.</div>');
   }
+  
+  // Setup click handlers for custom map buttons
+  $('#select-mode-button').click(function(){
+    drawingManager.setDrawingMode(null);
+  }).click();
+  $('#polygon-mode-button').click(function(){
+    drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+  });
+  $('#delete-shape-button').click(function(){
+    var shape = selectedShape;
+    clearSelection();
+    shape.setMap(null);
+    srawingManager.setDrawingMode(null);
+  });
+  
+  // Add an event listener that selects the newly-drawn shape when the user
+  // clicks on it. 
+  google.maps.event.addListener(drawingManager, 'overlaycomplete', function(e) {
+    if(e.type != google.maps.drawing.OverlayType.MARKER) {
+      
+      var newShape = e.overlay;
+      
+      shapes.push(newShape);
+      
+      google.maps.event.addListener(newShape, 'click', function() {
+        setSelection(newShape);
+      });
+      
+      setSelection(newShape);
+    }
+  });
+  
+  // Clear the current selection when the drawing mode is changed, or when the
+  // map is clicked.
+  google.maps.event.addListener(drawingManager, 'drawingmode_changed', clearSelection);
+  google.maps.event.addListener(map, 'click', clearSelection);
   
 };
 
@@ -182,9 +218,17 @@ function setSelection(shape){
   selectedShape = shape;
   shape.setEditable(true);
   shape.setDraggable(true);
+  
+  // Enable polygon vertexes to be deleted.
+  // Inspired by http://stackoverflow.com/a/14441786/879121
   shape.addListener('rightclick', function(event){
-    if(event.vertex != null && this.getPath().getLength() > 3){
-      this.getPath().removeAt(event.vertex);
+    if(event.path && event.vertex != null){
+      var path = this.getPaths().getAt(event.path);
+      if(path.getLength() > 3){
+        path.removeAt(event.vertex);
+      } else {
+        this.getPaths().removeAt(event.path);
+      }
     }
   });
 };

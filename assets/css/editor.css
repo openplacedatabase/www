@@ -27,6 +27,13 @@
   right: 0;
 }
 
+#map-controls {
+  position: absolute;
+  left: 500px;
+  top: 0px;
+  padding: 5px;
+}
+
 .geo-row {
   padding: 5px 0;
 }
