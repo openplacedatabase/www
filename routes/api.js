@@ -62,6 +62,7 @@ module.exports = function(app){
     
   });
   
+  // Create or update a place or geojson
   app.post('/api/v0/place/:id/:geo?', function(req, res){
     
     // Check json object
