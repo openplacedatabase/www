@@ -1,8 +1,14 @@
 var sidebar,
+    editPolygonButton,
+    deletePolygonButton,
+    drawPolygonButton,
     shapes = [],
     selectedShape,
+    editing = false,
     map,
     drawingManager,
+    
+    // Options that control the display of the Google Map
     mapOptions = {
       center: new google.maps.LatLng(20,-10),
       zoom: 3,
@@ -34,22 +40,44 @@ var sidebar,
         }     
       ]
     },
-    polygonOptions = {
+    
+    // Non-selected polygons are green
+    basePolygonStyle = {
       "strokeColor": "#228b22",
       "strokeOpacity": 1,
       "strokeWeight": 3,
       "fillColor": "#228b22",
       "fillOpacity": 0.3
     },
+    
+    // Selected polygons are orange
+    selectedPolygonStyle = {
+      "strokeColor": "#FE8C00",
+      "strokeOpacity": 1,
+      "strokeWeight": 3,
+      "fillColor": "#FE8C00",
+      "fillOpacity": 0.3
+    },
+    
+    // Options for the Google Maps Drawing Manager
     drawingControlOptions = {
+      
+      // Map is not in drawing mode when it loads
       drawingMode: null,
+      
+      // Don't use Google's controls; we will be using custom buttons
+      drawingControl: false,
+      
+      // Only enable drawing polygons
       drawingControlOptions: {
         position: google.maps.ControlPosition.TOP_LEFT,
         drawingModes: [
           google.maps.drawing.OverlayType.POLYGON
         ]
       },
-      polygonOptions: polygonOptions
+      
+      // Style of newly drawn polygons
+      polygonOptions: basePolygonStyle
     };
     
 $(document).ready(function(){
@@ -90,41 +118,34 @@ function initialize(){
     sidebar.html('<div class="alert alert-danger">No place was selected for editing. Return to the <a href="/map">search</a> page to select a place for editing.</div>');
   }
   
-  // Setup click handlers for custom map buttons
-  $('#select-mode-button').click(function(){
-    drawingManager.setDrawingMode(null);
-  }).click();
-  $('#polygon-mode-button').click(function(){
+  //
+  // Setup custom map controls
+  //
+
+  editPolygonButton = $('#map-edit-polygon-button').click(function(){
+    enableEditing();
+  });
+  
+  deletePolygonButton = $('#map-delete-polygon-button').click(deleteSelectedShape);
+  
+  drawPolygonButton = $('#map-draw-polygon-button').click(function(){
+    clearSelection();
+    disableShapeOperationButtons();
     drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
   });
-  $('#delete-shape-button').click(function(){
-    var shape = selectedShape;
-    clearSelection();
-    shape.setMap(null);
-    srawingManager.setDrawingMode(null);
-  });
   
-  // Add an event listener that selects the newly-drawn shape when the user
-  // clicks on it. 
-  google.maps.event.addListener(drawingManager, 'overlaycomplete', function(e) {
-    if(e.type != google.maps.drawing.OverlayType.MARKER) {
-      
-      var newShape = e.overlay;
-      
-      shapes.push(newShape);
-      
-      google.maps.event.addListener(newShape, 'click', function() {
-        setSelection(newShape);
-      });
-      
+  disableShapeOperationButtons();
+  enableDrawingModeButtons();
+  
+  // When new shapes are drawn, save them and allow them to be selected  
+  google.maps.event.addListener(drawingManager, 'overlaycomplete', function(e) {   
+    drawingManager.setDrawingMode(null);
+    var newShape = e.overlay;     
+    shapes.push(newShape);    
+    google.maps.event.addListener(newShape, 'click', function() {
       setSelection(newShape);
-    }
+    });
   });
-  
-  // Clear the current selection when the drawing mode is changed, or when the
-  // map is clicked.
-  google.maps.event.addListener(drawingManager, 'drawingmode_changed', clearSelection);
-  google.maps.event.addListener(map, 'click', clearSelection);
   
 };
 
@@ -178,7 +199,7 @@ function getGeoJSON(placeId, geoId){
   $.get('/api/v0/place/' + placeId + '/' + geoId).done(function(result){
     
     // Convert the geojson to a google maps object
-    var newShapes = new GeoJSON(result.data, polygonOptions);
+    var newShapes = new GeoJSON(result.data, basePolygonStyle);
     
     // Handle possible conversion errors
     if(newShapes.error) {
@@ -196,50 +217,82 @@ function getGeoJSON(placeId, geoId){
       // Move and zoom to fit the shape.
       // Add event listeners for selecting shapes.
       var bounds = new google.maps.LatLngBounds();
+      var pointCount = 0;
+      var paths;
       $.each(newShapes, function(i, shape){
         shape.setMap(map);
+        paths = shape.getPaths();
+        for(var i = 0; i < paths.getLength(); i++){
+          pointCount += paths.getAt(i).getLength();
+        }
         bounds.union(shape.getBounds());
         google.maps.event.addListener(shape, 'click', function() {
           setSelection(shape);
         });
       });
       map.fitBounds(bounds);
-      
+      console.log('points', pointCount);
     }
   });
   
+};
+
+/**
+ * Enable editing of the currently selected shape
+ */
+function enableEditing(){
+  if(selectedShape){
+    editing = true;
+    selectedShape.setEditable(true);
+    
+    // Enable polygon vertexes to be deleted.
+    // Inspired by http://stackoverflow.com/a/14441786/879121
+    selectedShape.addListener('rightclick', function(event){
+      if(event.path != null && event.vertex != null){
+        var path = this.getPaths().getAt(event.path);
+        if(path.getLength() > 3){
+          path.removeAt(event.vertex);
+        } else {
+          this.getPaths().removeAt(event.path);
+        }
+      }
+    });
+  }
 };
 
 /**
  * Select a shape and set it as editable
  */
 function setSelection(shape){
-  clearSelection();
-  selectedShape = shape;
-  shape.setEditable(true);
-  shape.setDraggable(true);
-  
-  // Enable polygon vertexes to be deleted.
-  // Inspired by http://stackoverflow.com/a/14441786/879121
-  shape.addListener('rightclick', function(event){
-    if(event.path && event.vertex != null){
-      var path = this.getPaths().getAt(event.path);
-      if(path.getLength() > 3){
-        path.removeAt(event.vertex);
-      } else {
-        this.getPaths().removeAt(event.path);
-      }
-    }
-  });
+  if(!editing){
+    clearSelection();
+    selectedShape = shape;
+    
+    // Highlight selected shape and make it draggable
+    shape.setOptions(selectedPolygonStyle);
+    shape.setDraggable(true);
+    
+    enableShapeOperationButtons();
+    disableDrawingModeButtons();
+    
+    // Clear the selection when the user clicks on the map
+    google.maps.event.addListener(map, 'click', function(){
+      clearSelection();
+      disableShapeOperationButtons();
+      enableDrawingModeButtons();
+    });
+  }
 };
 
 /**
  * Removes selection from the currently selected shape
  */
 function clearSelection(){
+  editing = false;
   if(selectedShape) {
     selectedShape.setEditable(false);
     selectedShape.setDraggable(false);
+    selectedShape.setOptions(basePolygonStyle);
     selectedShape = null;
   }
 };
@@ -253,6 +306,50 @@ function clearShapes(){
       shape.setMap(null);
     });
   }
+};
+
+/**
+ * Delete the selected shape and reset map mode
+ */
+function deleteSelectedShape(){
+  selectedShape.setMap(null);
+  clearSelection();
+  disableShapeOperationButtons();
+  enableDrawingModeButtons();
+};
+
+/**
+ * Enable buttons which operate on the selected shape
+ */
+function enableShapeOperationButtons(){
+  if(selectedShape){
+    editPolygonButton.removeAttr('disabled');
+    deletePolygonButton.removeAttr('disabled');
+  } else {
+    console.error('Cannot enable shapes operation buttons when a shape is not selected');
+  }
+};
+
+/**
+ * Disable shape operation buttons
+ */
+function disableShapeOperationButtons(){
+  editPolygonButton.attr('disabled','disabled');
+  deletePolygonButton.attr('disabled','disabled');
+};
+
+/**
+ * Enable drawing mode buttons
+ */
+function enableDrawingModeButtons(){
+  drawPolygonButton.removeAttr('disabled');
+};
+
+/** 
+ * Disable drawing mode buttons
+ */
+function disableDrawingModeButtons(){
+  drawPolygonButton.attr('disabled','disabled');
 };
 
 /**

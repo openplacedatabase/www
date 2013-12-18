@@ -12,20 +12,15 @@
 <div id="map"></div>
 
 <div id="map-controls">
-
-  <div class="btn-group" data-toggle="buttons">
-    <label id="select-mode-button" class="btn btn-white btn-sm">
-      <input type="radio" name="mode" /><span class="glyphicon glyphicon-move"></span>
-    </label>
-    <label id="polygon-mode-button" class="btn btn-white btn-sm">
-      <input type="radio" name="mode" /><span class="glyphicon glyphicon-pencil"></span>
-    </label>
-  </div>
-  
-  <button id="delete-shape-button" type="button" class="btn btn-white btn-sm">
+  <button id="map-draw-polygon-button" type="bujtton" class="btn btn-white btn-sm" title="Draw A New Shape">
+    <span class="glyphicon glyphicon-bookmark"></span>
+  </button>
+  <button id="map-edit-polygon-button" type="button" class="btn btn-white btn-sm" title="Edit Selected Shape">
+    <span class="glyphicon glyphicon-edit"></span>
+  </button>
+  <button id="map-delete-polygon-button" type="button" class="btn btn-white btn-sm" title="Delete Selected Shape">
     <span class="glyphicon glyphicon-remove"></span>
   </button>
-
 </div>
 
 <script>
