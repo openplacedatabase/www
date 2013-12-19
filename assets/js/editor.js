@@ -103,7 +103,11 @@ $(document).ready(function(){
 function initialize(){
 
   sidebar = $('#sidebar');
+  
+  // Load our templates
+  $.Mustache.addFromDom()
 
+  // Setup Google Maps objects
   map = new google.maps.Map(document.getElementById("map"), mapOptions);
   drawingManager = new google.maps.drawing.DrawingManager(drawingControlOptions);
   drawingManager.setMap(map);
@@ -164,24 +168,18 @@ function getPlace(placeId){
     var placeContainer = $('<div class="col-sm-12">').appendTo(sidebar);
     
     // Display the names
-    placeContainer.append('<h3>Names</h3>');
-    $.each(place.names, function(i, name){
-      placeContainer.append('<p>' + name + '</p>');
-    });
+    placeContainer.mustache('names-list', place);
     
     // Display the GeoJSON
-    placeContainer.append('<h3>Boundaries</h3>');
-    var geoList = $('<div>').appendTo(placeContainer);
-    $.each(place.geojson, function(i, geo){
-      var editButton = $('<button type="button" class="btn btn-white btn-xs">Edit</button>')
-        .click(function(){
-          getGeoJSON(place.id, geo.id);
-        });
-      $('<div class="row geo-row">')
-        .append('<div class="col-sm-4">' + geo.from + '</div>')
-        .append('<div class="col-sm-4">' + geo.to + '</div>')
-        .append( $('<div class="col-sm-4">').append(editButton) )
-        .appendTo(geoList);
+    placeContainer.mustache('geo-list', place);
+    
+    //
+    // Setup event handlers
+    //
+    
+    // Edit boundary button click
+    placeContainer.on('click', '.edit-geo-button', function(){
+      getGeoJSON(place.id, $(this).data('geo-id'));
     });
     
   });

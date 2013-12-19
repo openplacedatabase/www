@@ -24,7 +24,9 @@ module.exports = function(app){
       css: ['/assets/css/editor.css'],
       js: [
         'https://maps.googleapis.com/maps/api/js?libraries=drawing&sensor=false&key=' + process.env.OPD_GOOGLE_API_KEY,
+        '//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.7.2/mustache.min.js',
         '/assets/vendor/js/GeoJSON.js',
+        '/assets/vendor/js/jquery.mustache.js',
         '/assets/js/editor.js'
       ],
       google_key: process.env.OPD_GOOGLE_API_KEY

@@ -16,12 +16,54 @@
     <span class="glyphicon glyphicon-bookmark"></span>
   </button>
   <button id="map-edit-polygon-button" type="button" class="btn btn-white btn-sm" title="Edit Selected Shape">
-    <span class="glyphicon glyphicon-edit"></span>
+    <span class="glyphicon glyphicon-pencil"></span>
   </button>
   <button id="map-delete-polygon-button" type="button" class="btn btn-white btn-sm" title="Delete Selected Shape">
     <span class="glyphicon glyphicon-remove"></span>
   </button>
 </div>
+
+<script id="names-list" type="text/html">
+  <div class="panel panel-default">
+    <div class="panel-heading"><h4>Names</h4></div>
+    <ul class="list-group">
+      {{#names}}{{>names-list-item}}{{/names}}
+    </ul>
+  </div>
+</script>
+
+<script id="names-list-item" type="text/html">
+  <li class="list-group-item">
+    {{.}}
+    <div class="btn-group pull-right">
+      <button id="map-edit-polygon-button" type="button" class="btn btn-white btn-xs" title="Edit Name">
+        <span class="glyphicon glyphicon-pencil"></span>
+      </button>
+      <button id="map-delete-polygon-button" type="button" class="btn btn-white btn-xs" title="Delete Name">
+        <span class="glyphicon glyphicon-remove"></span>
+      </button>
+    </div>
+  </li>
+</script>
+
+<script id="geo-list" type="text/html">
+  <div class="panel panel-default">
+    <div class="panel-heading"><h4>Boundaries</h4></div>
+    <ul class="list-group">
+      {{#geojson}}{{>geo-list-item}}{{/geojson}}
+    </ul>
+  </div>
+</script>
+
+<script id="geo-list-item" type="text/html">
+  <li class="list-group-item">
+    <div class="col-sm-4">{{from}}</div>
+    <div class="col-sm-4">{{to}}</div>
+    <div class="col-sm-4">
+      <button type="button" class="edit-geo-button btn btn-white btn-xs" data-geo-id="{{id}}">Edit</button>
+    </div>
+  </li>
+</script>
 
 <script>
   var GOOGLE_API_KEY = "<%= google_key %>";
