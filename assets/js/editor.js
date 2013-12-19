@@ -217,21 +217,14 @@ function getGeoJSON(placeId, geoId){
       // Move and zoom to fit the shape.
       // Add event listeners for selecting shapes.
       var bounds = new google.maps.LatLngBounds();
-      var pointCount = 0;
-      var paths;
       $.each(newShapes, function(i, shape){
         shape.setMap(map);
-        paths = shape.getPaths();
-        for(var i = 0; i < paths.getLength(); i++){
-          pointCount += paths.getAt(i).getLength();
-        }
         bounds.union(shape.getBounds());
         google.maps.event.addListener(shape, 'click', function() {
           setSelection(shape);
         });
       });
       map.fitBounds(bounds);
-      console.log('points', pointCount);
     }
   });
   
@@ -276,7 +269,7 @@ function setSelection(shape){
     disableDrawingModeButtons();
     
     // Clear the selection when the user clicks on the map
-    google.maps.event.addListener(map, 'click', function(){
+    addMapClickListener(function(){
       clearSelection();
       disableShapeOperationButtons();
       enableDrawingModeButtons();
@@ -350,6 +343,18 @@ function enableDrawingModeButtons(){
  */
 function disableDrawingModeButtons(){
   drawPolygonButton.attr('disabled','disabled');
+};
+
+function addMapClickListener(listener){
+  removeMapClickListeners();
+  google.maps.event.addListener(map, 'click', listener);
+};
+
+/**
+ * Remove all click listeners from map
+ */
+function removeMapClickListeners(){
+  google.maps.event.clearListeners(map, 'click');
 };
 
 /**
