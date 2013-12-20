@@ -192,6 +192,20 @@ function getPlace(placeId){
       getGeoJSON(place.id, $(this).data('geo-id'));
     });
     
+    // New geo button
+    $('#new-geo-button').click(function(){
+      $('#new-geo-list-item').before($.Mustache.render('geo-list-item', {
+        from: '',
+        to: '',
+        id: ''
+      }));
+    });
+    
+    // Delete geo button
+    placeContainer.on('click', '.delete-geo-button', function(){
+      $(this).closest('.list-group-item').remove();
+    });
+    
   });
 
 };
