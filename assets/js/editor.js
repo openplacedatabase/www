@@ -177,7 +177,17 @@ function getPlace(placeId){
     // Setup event handlers
     //
     
-    // Edit boundary button click
+    // Delete name button
+    placeContainer.on('click', '.delete-name-button', function(){
+      $(this).closest('.list-group-item').remove();
+    });
+    
+    // New name button
+    $('#new-name-button').click(function(){
+      $('#new-name-list-item').before($.Mustache.render('names-list-item'));
+    });
+    
+    // Edit boundary button
     placeContainer.on('click', '.edit-geo-button', function(){
       getGeoJSON(place.id, $(this).data('geo-id'));
     });
