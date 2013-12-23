@@ -154,7 +154,7 @@ module.exports = function(app){
     
     // Check version
     if(_.isUndefined(obj.version)) throw new Error("version is required");
-    if(parseInt(obj.version) !== 1) throw new Error("version 1 is the only version supported right now");
+    if(obj.version !== 1) throw new Error("version 1 is the only version supported right now");
     
     // Check names
     if(_.isUndefined(obj.names)) throw new Error("names is required");

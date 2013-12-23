@@ -236,7 +236,7 @@ function getPlace(placeId){
           postData.geojson.push({
             from: fromDateString,
             to: toDateString,
-            id: i+1
+            id: i+1+''
           });
           
         }
@@ -249,7 +249,11 @@ function getPlace(placeId){
       console.log(postData);
       
       // Ajax POST
-      $.post('/api/v0/place/' + placeId, postData).done(function(){
+      $.ajax('/api/v0/place/' + placeId, {
+        contentType: 'application/json',
+        data: JSON.stringify(postData),
+        type: 'POST'
+      }).done(function(){
         changesSaved();
       }).fail(function(){
         console.error('Save failed');
