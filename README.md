@@ -31,7 +31,7 @@ sudo apt-get install openjdk-7-jre
 wget <link to elasticsearch >
 sudo dpkg -i <elasticsearch.deb file>
 cd /usr/share/elasticsearch/
-sudo ./bin/plugin -install fr.pilato.elasticsearch.river/fsriver/0.4.0-SNAPSHOT
+sudo ./bin/plugin -install fr.pilato.elasticsearch.river/fsriver/0.3.0
 sudo ./bin/plugin -install mobz/elasticsearch-head
 sudo service elasticsearch restart
 ````
