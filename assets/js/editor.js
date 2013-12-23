@@ -2,10 +2,13 @@ var sidebar,
     editPolygonButton,
     deletePolygonButton,
     drawPolygonButton,
+    
+    editing = false,
+    detailChanges = false,
+    
+    map,
     shapes = [],
     selectedShape,
-    editing = false,
-    map,
     drawingManager,
     
     // Options that control the display of the Google Map
@@ -167,23 +170,102 @@ function getPlace(placeId){
     
     var placeContainer = $('<div class="col-sm-12">').appendTo(sidebar);
     
-    // Display the names
-    placeContainer.mustache('names-list', place);
-    
-    // Display the GeoJSON
-    placeContainer.mustache('geo-list', place);
+    // Display the place details
+    placeContainer.mustache('place-details', place);
     
     //
     // Setup event handlers
     //
     
+    // Save button
+    $('#save-place-details-button').click(function(){
+      var self = $(this).attr('disabled','disabled').text('Saving...');
+      
+      // Gather data
+      var postData = {
+        id: placeId,
+        version: 1,
+        names: [],
+        from: null,
+        to: null,
+        geojson: []
+      };
+      
+      // names
+      placeContainer.find('.place-name-input').each(function(){
+        var name = $.trim($(this).val());
+        if(name){
+          postData.names.push(name);
+        }
+      });
+      
+      // geojson
+      var minDate, minDateString, maxDate, maxDateString;
+      
+      placeContainer.find('.geo-date-row').each(function(i){
+        
+        var fromDateString = $.trim($(this).find('.geo-date-from').val()),
+            toDateString = $.trim($(this).find('.geo-date-to').val());
+        
+        if(fromDateString && toDateString){
+        
+          var fromDate = createComplexDate(fromDateString),
+              toDate = createComplexDate(toDateString);
+   
+          // Set min and max on first traversal
+          if(i === 0){
+            minDate = fromDate;
+            minDateString = fromDateString;
+            maxDate = toDate;
+            maxDateString = toDateString;
+          }
+          
+          // Update max/min dates
+          else {
+            if(fromDate < minDate){
+              minDate = fromDate;
+              minDateString = fromDateString;
+            }
+            if(toDate > maxDate){
+              maxDate = toDate;
+              maxDateString = toDateString;
+            }
+          }
+          
+          // Push geojson
+          postData.geojson.push({
+            from: fromDateString,
+            to: toDateString,
+            id: i+1
+          });
+          
+        }
+        
+      });
+      
+      postData.from = minDateString;
+      postData.to = maxDateString;
+      
+      console.log(postData);
+      
+      // Ajax POST
+      $.post('/api/v0/place/' + placeId, postData).done(function(){
+        changesSaved();
+      }).fail(function(){
+        console.error('Save failed');
+      });
+      
+    });
+    
     // Delete name button
     placeContainer.on('click', '.delete-name-button', function(){
       $(this).closest('.list-group-item').remove();
+      detailsChanged();
     });
     
     // New name button
     $('#new-name-button').click(function(){
+      detailsChanged();
       $('#new-name-list-item').before($.Mustache.render('names-list-item'));
     });
     
@@ -194,6 +276,7 @@ function getPlace(placeId){
     
     // New geo button
     $('#new-geo-button').click(function(){
+      detailsChanged();
       $('#new-geo-list-item').before($.Mustache.render('geo-list-item', {
         from: '',
         to: '',
@@ -204,6 +287,7 @@ function getPlace(placeId){
     // Delete geo button
     placeContainer.on('click', '.delete-geo-button', function(){
       $(this).closest('.list-group-item').remove();
+      detailsChanged();
     });
     
   });
@@ -250,6 +334,23 @@ function getGeoJSON(placeId, geoId){
     }
   });
   
+};
+
+/**
+ * Update state to reflect unsaved changes
+ */
+function detailsChanged(){
+  detailChanges = true;
+  // Display and update 'save' button
+  $('#save-place-details-button').css('visibility', 'visible').text('Save').removeAttr('disabled');
+};
+
+/**
+ * Update state to reflect that changes have been saved
+ */
+function changesSaved(){
+  detailChanges = false;
+  $('#save-place-details-button').text('Saved').attr('disabled','disabled');
 };
 
 /**
@@ -377,6 +478,37 @@ function addMapClickListener(listener){
  */
 function removeMapClickListeners(){
   google.maps.event.clearListeners(map, 'click');
+};
+
+/**
+ * Generate javascript from string of format '-yyyy-mm-dd'
+ * by converting it to a string of format '-yyyyyy-mm-dd'
+ * to correctly handle all BC and AD dates
+ */
+function createComplexDate(simpleDateString){
+  var simpleParts = getDateParts(simpleDateString),
+      simpleYear = simpleParts[0],
+      simpleYearParts = simpleYear.match(/(-)?(\d{1,4})/),
+      complexSign = simpleYearParts[1] === '-' ? '-' : '+',
+      complexYear = complexSign + padLeftNumString(simpleYearParts[2], 6);     
+  return new Date(complexYear + '-' + simpleParts[1] + '-' + simpleParts[2]);
+};
+
+/**
+ * http://stackoverflow.com/a/2998822/879121
+ */
+function padLeftNumString(num, size) {
+    var s = num+"";
+    while (s.length < size) s = "0" + s;
+    return s;
+};
+
+/**
+ * Splits a string of format '-yyyy-mm-dd' into 
+ * ['-yyyy', 'mm', 'dd']
+ */
+function getDateParts(dateString){
+  return dateString.match(/(-?\d{1,4})-(\d{2})-(\d{2})/).slice(1);
 };
 
 /**

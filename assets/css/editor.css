@@ -17,6 +17,7 @@
   bottom: 0;
   width: 500px;
   padding: 10px 5px;
+  overflow: auto;
 }
 
 #map {
@@ -36,4 +37,8 @@
 
 #sidebar .list-group-item {
   overflow: auto;
+}
+
+#save-place-details-button {
+  visibility: hidden;
 }

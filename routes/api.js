@@ -154,7 +154,7 @@ module.exports = function(app){
     
     // Check version
     if(_.isUndefined(obj.version)) throw new Error("version is required");
-    if(obj.version !== 1) throw new Error("version 1 is the only version supported right now");
+    if(parseInt(obj.version) !== 1) throw new Error("version 1 is the only version supported right now");
     
     // Check names
     if(_.isUndefined(obj.names)) throw new Error("names is required");
@@ -165,11 +165,11 @@ module.exports = function(app){
     
     // Check from
     if(_.isUndefined(obj.from)) throw new Error("from is required");
-    if(!checkYear(obj.from)) throw new Error("from must be an integer between -9999 and 9999");
+    if(!checkDate(obj.from)) throw new Error("from must be of the format yyyy-mm-dd");
     
     // Check to
     if(_.isUndefined(obj.to)) throw new Error("to is required");
-    if(!checkYear(obj.to)) throw new Error("to must be an integer between -9999 and 9999");
+    if(!checkDate(obj.to)) throw new Error("to must be of the format yyyy-mm-dd");
     
     // Make sure from is not > to
     if(obj.from > obj.to) throw new Error("from must be <= to");
@@ -186,10 +186,10 @@ module.exports = function(app){
       if(Object.keys(elem).length != 3) throw new Error("in a geojson element, only from, to, and id are allowed");
       
       if(_.isUndefined(elem.from)) throw new Error("in a geojson element, from is required");
-      if(!checkYear(obj.from)) throw new Error("in a geojson element, from must be an integer between -9999 and 9999");
+      if(!checkDate(obj.from)) throw new Error("in a geojson element, from must be of the format yyyy-mm-dd");
       
       if(_.isUndefined(elem.to)) throw new Error("in a geojson element, from is required");
-      if(!checkYear(obj.to)) throw new Error("in a geojson element, from must be an integer between -9999 and 9999");
+      if(!checkDate(obj.to)) throw new Error("in a geojson element, to must be of the format yyyy-mm-dd");
       
       if(_.isUndefined(elem.id)) throw new Error("in a geojson element, id is required");
       if(!_.isString(elem.id)) throw new Error("in a geojson element, id must be a string");
@@ -211,15 +211,10 @@ module.exports = function(app){
   }
   
   /**
-   * Returns true only if the year is valid according to version 1
+   * Returns true only if the date is valid according to version 1
    */
-  function checkYear(year) {
-    
-    if(!_.isNumber(year) || parseInt(year) !== year || year < -9999 || year > 9999) {
-      return false ;
-    } else {
-      return true;
-    }
+  function checkDate(date) {
+    return /\d{1,4}-\d{2}-\d{2}/.test(date);
   }
   
   function apiReturn(data, code, msg) {
