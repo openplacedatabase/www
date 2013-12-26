@@ -155,7 +155,8 @@ function initialize(){
   google.maps.event.addListener(drawingManager, 'overlaycomplete', function(e) {   
     drawingManager.setDrawingMode(null);
     var newShape = e.overlay;     
-    shapes.push(newShape);    
+    shapes.push(newShape);
+    shapesChanged();
     google.maps.event.addListener(newShape, 'click', function() {
       setSelection(newShape);
     });
