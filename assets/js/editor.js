@@ -1,10 +1,13 @@
 var sidebar,
+
+    savePolygonsButton,
     editPolygonButton,
     deletePolygonButton,
     drawPolygonButton,
     
     editing = false,
     detailChanges = false,
+    shapeChanges = true,
     
     map,
     shapes = [],
@@ -128,6 +131,10 @@ function initialize(){
   //
   // Setup custom map controls
   //
+  
+  savePolygonsButton = $('#map-save-polygons-button').click(function(){
+    console.log('save map changes');
+  });
 
   editPolygonButton = $('#map-edit-polygon-button').click(function(){
     enableEditing();
@@ -141,8 +148,8 @@ function initialize(){
     drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
   });
   
-  disableShapeOperationButtons();
-  enableDrawingModeButtons();
+  // Can't interact with the map until a boundary is chosen
+  disableMapButtons();
   
   // When new shapes are drawn, save them and allow them to be selected  
   google.maps.event.addListener(drawingManager, 'overlaycomplete', function(e) {   
@@ -335,22 +342,34 @@ function getGeoJSON(placeId, geoId){
         });
       });
       map.fitBounds(bounds);
+      
+      // Enable drawing mode buttons
+      enableDrawingModeButtons();
     }
   });
   
 };
 
 /**
- * Update state to reflect unsaved changes
+ * Update state to reflect unsaved changes to the shapes on the map
+ */
+function shapesChanged(){
+  shapeChanges = true;
+  savePolygonsButton.removeAttr('disabled');
+};
+
+/**
+ * Update state to reflect unsaved changes in place details
  */
 function detailsChanged(){
   detailChanges = true;
+  
   // Display and update 'save' button
   $('#save-place-details-button').css('visibility', 'visible').text('Save').removeAttr('disabled');
 };
 
 /**
- * Update state to reflect that changes have been saved
+ * Update state to reflect that place detail changes have been saved
  */
 function changesSaved(){
   detailChanges = false;
@@ -365,6 +384,19 @@ function enableEditing(){
     editing = true;
     selectedShape.setEditable(true);
     
+    // Listen for changes to the points
+    selectedShape.getPaths().forEach(function(path, index){
+      google.maps.event.addListener(path, 'insert_at', function(){
+        shapesChanged();
+      });
+      google.maps.event.addListener(path, 'remove_at', function(){
+        shapesChanged();
+      });
+      google.maps.event.addListener(path, 'set_at', function(){
+        shapesChanged();
+      });
+    });
+    
     // Enable polygon vertexes to be deleted.
     // Inspired by http://stackoverflow.com/a/14441786/879121
     selectedShape.addListener('rightclick', function(event){
@@ -375,6 +407,7 @@ function enableEditing(){
         } else {
           this.getPaths().removeAt(event.path);
         }
+        shapesChanged();
       }
     });
   }
@@ -391,6 +424,11 @@ function setSelection(shape){
     // Highlight selected shape and make it draggable
     shape.setOptions(selectedPolygonStyle);
     shape.setDraggable(true);
+    
+    // Listen for changes to the shape
+    selectedShape.addListener('dragend', function(){
+      shapesChanged();
+    });
     
     enableShapeOperationButtons();
     disableDrawingModeButtons();
@@ -436,6 +474,15 @@ function deleteSelectedShape(){
   clearSelection();
   disableShapeOperationButtons();
   enableDrawingModeButtons();
+};
+
+/**
+ * Disable all buttons on the map
+ */
+function disableMapButtons(){
+  savePolygonsButton.attr('disabled','disabled');
+  disableShapeOperationButtons();
+  disableDrawingModeButtons();
 };
 
 /**
