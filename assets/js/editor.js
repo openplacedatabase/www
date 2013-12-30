@@ -369,16 +369,17 @@ function savePlaceDetails(){
     id: placeId,
     version: 1,
     names: [],
-    geojsons: []
+    geojsons: [],
+    sources: []
   };
   
   // names
   sidebar.find('.names-list-item').each(function(){
     var row = $(this);
     var name = {
-      name: row.find('.place-name-input').val(),
-      from: row.find('.date-from').val(),
-      to: row.find('.date-to').val()
+      name: $.trim(row.find('.place-name-input').val()),
+      from: $.trim(row.find('.date-from').val()),
+      to: $.trim(row.find('.date-to').val())
     };
     if(name.name){
       postData.names.push(name);
@@ -427,6 +428,11 @@ function savePlaceDetails(){
       
     }
     
+  });
+  
+  // sources
+  sidebar.find('.source-list-item').each(function(){
+    postData.sources.push($.trim($(this).text()));
   });
   
   console.log(postData);

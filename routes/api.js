@@ -175,8 +175,12 @@ module.exports = function(app){
       if(!_.isString(elem.name)) throw new Error("in a name element, name must be a string");
     }
     
-    // Make sure from is not > to
-    if(obj.from > obj.to) throw new Error("from must be <= to");
+    // Check sources
+    if(_.isUndefined(obj.sources)) throw new Error("sources is required");
+    if(!_.isArray(obj.sources)) throw new Error("sources must be an array");
+    for(var x in obj.sources) {
+      if(!_.isString(obj.sources[x])) throw new Error("sources must be an array of string");
+    }
     
     // Check geojson
     var geojsonsToCheck = [];
@@ -201,8 +205,8 @@ module.exports = function(app){
       geojsonsToCheck.push(elem.id);
     }
     
-    //make sure there are no more than 4 elements in the object
-    if(Object.keys(obj).length != 4) throw new Error("only id, version, names, and geojson are allowed"); 
+    //make sure there are no more than 5 elements in the object
+    if(Object.keys(obj).length != 5) throw new Error("only id, version, names, sources, and geojson are allowed"); 
     
   }
   

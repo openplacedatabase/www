@@ -66,6 +66,7 @@
   <p class="text-right"><button id="save-place-details-button" class="btn btn-white">Save</button></p>
   {{>names-list}}
   {{>geo-list}}
+  {{>sources-list}}
 </script>
 
 <script id="names-list" type="text/html">
@@ -169,6 +170,19 @@
       </div>
     </div>
   </li>
+</script>
+
+<script id="sources-list" type="text/html">
+  <div class="panel panel-default">
+    <div class="panel-heading"><h4>Sources</h4></div>
+    <ul class="list-group">
+      {{#sources}}
+      <li class="source-list-item list-group-item">
+        {{.}}
+      </li>
+      {{/sources}}
+    </ul>
+  </div>
 </script>
 
 <script>
