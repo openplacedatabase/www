@@ -231,6 +231,19 @@ function getPlace(placeId){
       window.open('/api/v0/place/' + placeId + '/' + geoId, '_blank');
     });
     
+    // Upload geojson button
+    placeContainer.on('click', '.upload-geojson-button', function(){
+      $('#upload-geojson-modal').modal('show');
+      var geoId = $(this).closest('.geo-list-item').data('geo-id');
+      $('#upload-geo-id').val(geoId);
+    });
+    
+    // Select a file for upload
+    $('#upload-file').change(selectUploadFile);
+    
+    // Finalize upload
+    $('#upload-save-button').click(uploadGeojson);
+    
   });
 
 };
@@ -289,6 +302,37 @@ function getGeoJSON(placeId, geoId){
     }
   });
   
+};
+
+/**
+ * Gets called when the user selects a file for uploading
+ */
+function selectUploadFile(event){
+  console.log(event.target.files);
+  
+  var reader = new FileReader();
+  reader.onload = function(e){
+    console.log('reader onload');
+    $('#upload-text').val(JSON.stringify(JSON.parse(e.target.result), null, 2));
+  };
+  reader.onerror = function(e){
+    console.error('reader error');
+    console.error(e);
+  };
+  reader.readAsText(event.target.files[0]);
+};
+
+/**
+ * Save the geojson
+ */
+function uploadGeojson(){
+  $('#upload-save-button').attr('disabled','disabled').text('Uploading...');
+  var geoId = $('#upload-geo-id').val();
+  saveGeojson(geoId, JSON.parse($('#upload-text').val())).done(function(){
+    $('#upload-geojson-modal').modal('hide');
+    $('#upload-save-button').removeAttr('disabled').text('Upload');
+    $('#geo-' + geoId).find('.download-geojson-button').removeAttr('disabled');
+  });
 };
 
 /**
@@ -416,17 +460,24 @@ function saveShapes(){
     // Convert google shapes into GeoJSON
     var geojson = google.maps.geojson.to(shapes);
     
-    $.ajax('/api/v0/place/' + placeId + '/' + selectedBoundaryId, {
-      contentType: 'application/json',
-      data: JSON.stringify(geojson),
-      type: 'POST'
-    }).done(function(){
+    saveGeojson(selectedBoundaryId, geojson).done(function(){
       shapesSaved();
     }).fail(function(){
       console.error('Save failed');
     });
   
   }
+};
+
+/**
+ * Save geojson
+ */
+function saveGeojson(geoId, geojson){
+  return $.ajax('/api/v0/place/' + placeId + '/' + geoId, {
+    contentType: 'application/json',
+    data: JSON.stringify(geojson),
+    type: 'POST'
+  });
 };
 
 /**

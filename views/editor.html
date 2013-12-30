@@ -42,6 +42,26 @@
   </div>
 </div>
 
+<div class="modal fade" id="upload-geojson-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Upload GeoJSON</h4>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="upload-geo-id" />
+        <p><input type="file" id="upload-file" /></p>
+        <textarea id="upload-text"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="upload-save-button">Upload</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script id="place-details" type="text/html">
   <p class="text-right"><button id="save-place-details-button" class="btn btn-white">Save</button></p>
   {{>names-list}}
@@ -133,11 +153,14 @@
     <div class="row">
       <div class="col-sm-12">
         <div class="pull-right">
+          <button type="button" class="view-boundary-button btn btn-white btn-sm">
+            <span class="glyphicon glyphicon-map-marker"></span> View
+          </button>
           <button type="button" class="download-geojson-button btn btn-white btn-sm">
             <span class="glyphicon glyphicon-cloud-download"></span> Download
           </button>
-          <button type="button" class="view-boundary-button btn btn-white btn-sm">
-            <span class="glyphicon glyphicon-map-marker"></span> View
+          <button type="button" class="upload-geojson-button btn btn-white btn-sm">
+            <span class="glyphicon glyphicon-cloud-upload"></span> Upload
           </button>
           <button type="button" class="delete-geo-button btn btn-white btn-sm">
             <span class="glyphicon glyphicon-remove"></span> Delete

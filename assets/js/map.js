@@ -299,6 +299,11 @@ function getGeoJSON(placeId, geoId){
       });
       map.fitBounds(bounds);
       
+      var numPoints = 0;
+      newShapes[0].getPaths().forEach(function(path){
+        numPoints += path.getLength();
+      });
+      console.log(numPoints);
     }
   });
   
