@@ -293,23 +293,18 @@ function getPlace(placeId){
     });
     
     // New geo button
-    $('#new-geo-button').click(function(){
-      detailsChanged();
-      // Set the id of the new boundary to one greater
-      // than the last boundary in the list
-      var lastGeo = $('#new-geo-list-item').prev(),
-          newId = parseInt(lastGeo.data('geo-id')) + 1;
-      $($.Mustache.render('geo-list-item', {
-        from: '',
-        to: '',
-        id: newId
-      })).insertAfter(lastGeo).addClass(NEW_GEO_CLASS);
-    });
+    $('#new-geo-button').click(addNewBoundary);
     
     // Delete geo button
     placeContainer.on('click', '.delete-geo-button', function(){
       $(this).closest('.list-group-item').remove();
       detailsChanged();
+    });
+    
+    // Download geojson button
+    placeContainer.on('click', '.download-geojson-button', function(){
+      var geoId = $(this).closest('.geo-list-item').data('geo-id');
+      window.open('/api/v0/place/' + placeId + '/' + geoId, '_blank');
     });
     
   });
@@ -373,6 +368,29 @@ function getGeoJSON(placeId, geoId){
 };
 
 /**
+ * Add a new boundary item to the list
+ */
+function addNewBoundary(){
+  // Update state to reflect changes
+  detailsChanged();
+  
+  // Set the id of the new boundary to one greater
+  // than the last boundary in the list
+  var lastGeo = $('#new-geo-list-item').prev(),
+      newId = parseInt(lastGeo.data('geo-id')) + 1;
+  
+  // Insert new HTML
+  var newGeo = $($.Mustache.render('geo-list-item', {
+    from: '',
+    to: '',
+    id: newId
+  })).insertAfter(lastGeo).addClass(NEW_GEO_CLASS);
+  
+  // Disable download geo-json until the shapes have been saved
+  newGeo.find('.download-geojson-button').attr('disabled','disabled');
+}
+
+/**
  * Save the current state of the map
  */
 function saveShapes(){
@@ -381,7 +399,9 @@ function saveShapes(){
   
   if(shapes.length > 0){
   
-    $('#geo-' + selectedBoundaryId).removeClass(NEW_GEO_CLASS);
+    $('#geo-' + selectedBoundaryId)
+      .removeClass(NEW_GEO_CLASS)
+      .find('.download-geojson-button').removeAttr('disabled');
     
     // Convert google shapes into GeoJSON
     var geojson = google.maps.geojson.to(shapes);
