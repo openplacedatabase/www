@@ -1,4 +1,6 @@
-var sidebar,
+var NEW_GEO_CLASS = 'new-geo',
+
+    sidebar,
 
     savePolygonsButton,
     editPolygonButton,
@@ -284,19 +286,24 @@ function getPlace(placeId){
       $('#new-name-list-item').before($.Mustache.render('names-list-item'));
     });
     
-    // Edit boundary button
-    placeContainer.on('click', '.edit-geo-button', function(){
-      selectBoundary(place.id, $(this).data('geo-id'));
+    // View boundary button
+    placeContainer.on('click', '.view-boundary-button', function(){
+      var geo = $(this).closest('.geo-list-item');
+      selectBoundary(place.id, geo.data('geo-id'), geo.hasClass(NEW_GEO_CLASS));
     });
     
     // New geo button
     $('#new-geo-button').click(function(){
       detailsChanged();
-      $('#new-geo-list-item').before($.Mustache.render('geo-list-item', {
+      // Set the id of the new boundary to one greater
+      // than the last boundary in the list
+      var lastGeo = $('#new-geo-list-item').prev(),
+          newId = parseInt(lastGeo.data('geo-id')) + 1;
+      $($.Mustache.render('geo-list-item', {
         from: '',
         to: '',
-        id: ''
-      }));
+        id: newId
+      })).insertAfter(lastGeo).addClass(NEW_GEO_CLASS);
     });
     
     // Delete geo button
@@ -312,18 +319,21 @@ function getPlace(placeId){
 /**
  * Fetch shapes for selected boundary and update app state
  */
-function selectBoundary(placeId, geoId){
+function selectBoundary(placeId, geoId, newGeo){
   selectedBoundaryId = geoId;
   savePolygonsButton.attr('disabled','disabled');
-  getGeoJSON(placeId, geoId);
+  clearShapes();
+  if(!newGeo){
+    getGeoJSON(placeId, geoId);
+  } else {
+    enableDrawingModeButtons();
+  }
 };
 
 /**
  * Get the geojson
  */
 function getGeoJSON(placeId, geoId){
-  
-  clearShapes();
   
   // Get the new shape
   $.get('/api/v0/place/' + placeId + '/' + geoId).done(function(result){
@@ -355,8 +365,7 @@ function getGeoJSON(placeId, geoId){
         });
       });
       map.fitBounds(bounds);
-      
-      // Enable drawing mode buttons
+
       enableDrawingModeButtons();
     }
   });
@@ -367,21 +376,27 @@ function getGeoJSON(placeId, geoId){
  * Save the current state of the map
  */
 function saveShapes(){
-  
+
   savePolygonsButton.attr('disabled','disabled');
   
-  // Convert google shapes into GeoJSON
-  var geojson = google.maps.geojson.to(shapes);
+  if(shapes.length > 0){
   
-  $.ajax('/api/v0/place/' + placeId + '/' + selectedBoundaryId, {
-    contentType: 'application/json',
-    data: JSON.stringify(geojson),
-    type: 'POST'
-  }).done(function(){
-    shapesSaved();
-  }).fail(function(){
-    console.error('Save failed');
-  });
+    $('#geo-' + selectedBoundaryId).removeClass(NEW_GEO_CLASS);
+    
+    // Convert google shapes into GeoJSON
+    var geojson = google.maps.geojson.to(shapes);
+    
+    $.ajax('/api/v0/place/' + placeId + '/' + selectedBoundaryId, {
+      contentType: 'application/json',
+      data: JSON.stringify(geojson),
+      type: 'POST'
+    }).done(function(){
+      shapesSaved();
+    }).fail(function(){
+      console.error('Save failed');
+    });
+  
+  }
 };
 
 /**
@@ -517,6 +532,7 @@ function clearShapes(){
     $.each(shapes, function(i, shape){
       shape.setMap(null);
     });
+    shapes = [];
   }
 };
 

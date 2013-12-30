@@ -70,7 +70,7 @@
 </script>
 
 <script id="geo-list-item" type="text/html">
-  <li class="list-group-item">   
+  <li class="geo-list-item list-group-item" id="geo-{{id}}" data-geo-id="{{id}}">   
     <div class="geo-date-row row form-horizontal">
       <div class="col-sm-6">
         <div class="form-group">
@@ -92,10 +92,10 @@
     <div class="row">
       <div class="col-sm-12">
         <div class="pull-right">
-          <button type="button" class="edit-geo-button btn btn-white btn-sm" data-geo-id="{{id}}">
+          <button type="button" class="view-boundary-button btn btn-white btn-sm">
             <span class="glyphicon glyphicon-map-marker"></span> View Shape
           </button>
-          <button type="button" class="delete-geo-button btn btn-white btn-sm" data-geo-id="{{id}}">
+          <button type="button" class="delete-geo-button btn btn-white btn-sm">
             <span class="glyphicon glyphicon-remove"></span> Delete Shape
           </button>
         </div>
