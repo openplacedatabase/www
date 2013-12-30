@@ -190,89 +190,13 @@ function getPlace(placeId){
     // Setup event handlers
     //
     
-    // Save button
-    $('#save-place-details-button').click(function(){
-      var self = $(this).attr('disabled','disabled').text('Saving...');
-      
-      // Gather data
-      var postData = {
-        id: placeId,
-        version: 1,
-        names: [],
-        from: null,
-        to: null,
-        geojson: []
-      };
-      
-      // names
-      placeContainer.find('.place-name-input').each(function(){
-        var name = $.trim($(this).val());
-        if(name){
-          postData.names.push(name);
-        }
-      });
-      
-      // geojson
-      var minDate, minDateString, maxDate, maxDateString;
-      
-      placeContainer.find('.geo-list-item .date-row').each(function(i){
-        
-        var fromDateString = $.trim($(this).find('.date-from').val()),
-            toDateString = $.trim($(this).find('.date-to').val());
-        
-        if(fromDateString && toDateString){
-        
-          var fromDate = createComplexDate(fromDateString),
-              toDate = createComplexDate(toDateString);
-   
-          // Set min and max on first traversal
-          if(i === 0){
-            minDate = fromDate;
-            minDateString = fromDateString;
-            maxDate = toDate;
-            maxDateString = toDateString;
-          }
-          
-          // Update max/min dates
-          else {
-            if(fromDate < minDate){
-              minDate = fromDate;
-              minDateString = fromDateString;
-            }
-            if(toDate > maxDate){
-              maxDate = toDate;
-              maxDateString = toDateString;
-            }
-          }
-          
-          // Push geojson
-          postData.geojson.push({
-            from: fromDateString,
-            to: toDateString,
-            id: i+1+''
-          });
-          
-        }
-        
-      });
-      
-      postData.from = minDateString;
-      postData.to = maxDateString;
-      
-      console.log(postData);
-      
-      // Ajax POST
-      $.ajax('/api/v0/place/' + placeId, {
-        contentType: 'application/json',
-        data: JSON.stringify(postData),
-        type: 'POST'
-      }).done(function(){
-        detailsSaved();
-      }).fail(function(){
-        console.error('Save failed');
-      });
-      
+    // Catch changes to input values
+    placeContainer.on('change', 'input', function(){
+      detailsChanged();
     });
+    
+    // Save button
+    $('#save-place-details-button').click(savePlaceDetails);
     
     // Delete name button
     placeContainer.on('click', '.delete-name-button', function(){
@@ -388,6 +312,92 @@ function addNewBoundary(){
   
   // Disable download geo-json until the shapes have been saved
   newGeo.find('.download-geojson-button').attr('disabled','disabled');
+}
+
+/**
+ * Save place details
+ */
+function savePlaceDetails(){
+  $('#save-place-details-button').attr('disabled','disabled').text('Saving...');
+  
+  // Gather data
+  var postData = {
+    id: placeId,
+    version: 1,
+    names: [],
+    geojsons: []
+  };
+  
+  // names
+  sidebar.find('.names-list-item').each(function(){
+    var row = $(this);
+    var name = {
+      name: row.find('.place-name-input').val(),
+      from: row.find('.date-from').val(),
+      to: row.find('.date-to').val()
+    };
+    if(name.name){
+      postData.names.push(name);
+    }
+  });
+  
+  // geojson
+  var minDate, minDateString, maxDate, maxDateString;
+  
+  sidebar.find('.geo-list-item .date-row').each(function(i){
+    
+    var fromDateString = $.trim($(this).find('.date-from').val()),
+        toDateString = $.trim($(this).find('.date-to').val());
+    
+    if(fromDateString && toDateString){
+    
+      var fromDate = createComplexDate(fromDateString),
+          toDate = createComplexDate(toDateString);
+
+      // Set min and max on first traversal
+      if(i === 0){
+        minDate = fromDate;
+        minDateString = fromDateString;
+        maxDate = toDate;
+        maxDateString = toDateString;
+      }
+      
+      // Update max/min dates
+      else {
+        if(fromDate < minDate){
+          minDate = fromDate;
+          minDateString = fromDateString;
+        }
+        if(toDate > maxDate){
+          maxDate = toDate;
+          maxDateString = toDateString;
+        }
+      }
+      
+      // Push geojson
+      postData.geojsons.push({
+        from: fromDateString,
+        to: toDateString,
+        id: i+1+''
+      });
+      
+    }
+    
+  });
+  
+  console.log(postData);
+  
+  // Ajax POST
+  $.ajax('/api/v0/place/' + placeId, {
+    contentType: 'application/json',
+    data: JSON.stringify(postData),
+    type: 'POST'
+  }).done(function(){
+    detailsSaved();
+  }).fail(function(){
+    console.error('Save failed');
+  });
+  
 }
 
 /**

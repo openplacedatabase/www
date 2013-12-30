@@ -159,17 +159,21 @@ module.exports = function(app){
     // Check names
     if(_.isUndefined(obj.names)) throw new Error("names is required");
     if(!_.isArray(obj.names)) throw new Error("names must be an array");
-    for(x in obj.names) {
-      if(!_.isString(obj.names[x])) throw new Error("names must be an array of string");
+    for(var x in obj.names) {
+      var elem = obj.names[x];
+      
+      if(!_.isObject(elem)) throw new Error("name must be an array of objects");
+      if(Object.keys(elem).length != 3) throw new Error("in a name element, only from, to, and name are allowed");
+      
+      if(_.isUndefined(elem.from)) throw new Error("in a name element, from is required");
+      if(!checkDate(elem.from)) throw new Error("in a name element, from must be of the format yyyy-mm-dd");
+      
+      if(_.isUndefined(elem.to)) throw new Error("in a name element, to is required");
+      if(!checkDate(elem.to)) throw new Error("in a name element, to must be of the format yyyy-mm-dd");
+      
+      if(_.isUndefined(elem.name)) throw new Error("in a name element, name is required");
+      if(!_.isString(elem.name)) throw new Error("in a name element, name must be a string");
     }
-    
-    // Check from
-    if(_.isUndefined(obj.from)) throw new Error("from is required");
-    if(!checkDate(obj.from)) throw new Error("from must be of the format yyyy-mm-dd");
-    
-    // Check to
-    if(_.isUndefined(obj.to)) throw new Error("to is required");
-    if(!checkDate(obj.to)) throw new Error("to must be of the format yyyy-mm-dd");
     
     // Make sure from is not > to
     if(obj.from > obj.to) throw new Error("from must be <= to");
@@ -177,19 +181,19 @@ module.exports = function(app){
     // Check geojson
     var geojsonsToCheck = [];
     
-    if(_.isUndefined(obj.geojson)) throw new Error("geojson is required");
-    if(!_.isArray(obj.geojson)) throw new Error("geojson must be an array");
-    for(x in obj.geojson) {
-      var elem = obj.geojson[x];
+    if(_.isUndefined(obj.geojsons)) throw new Error("geojson is required");
+    if(!_.isArray(obj.geojsons)) throw new Error("geojson must be an array");
+    for(var x in obj.geojsons) {
+      var elem = obj.geojsons[x];
       
       if(!_.isObject(elem)) throw new Error("geojson must be an array of objects");
       if(Object.keys(elem).length != 3) throw new Error("in a geojson element, only from, to, and id are allowed");
       
       if(_.isUndefined(elem.from)) throw new Error("in a geojson element, from is required");
-      if(!checkDate(obj.from)) throw new Error("in a geojson element, from must be of the format yyyy-mm-dd");
+      if(!checkDate(elem.from)) throw new Error("in a geojson element, from must be of the format yyyy-mm-dd");
       
-      if(_.isUndefined(elem.to)) throw new Error("in a geojson element, from is required");
-      if(!checkDate(obj.to)) throw new Error("in a geojson element, to must be of the format yyyy-mm-dd");
+      if(_.isUndefined(elem.to)) throw new Error("in a geojson element, to is required");
+      if(!checkDate(elem.to)) throw new Error("in a geojson element, to must be of the format yyyy-mm-dd");
       
       if(_.isUndefined(elem.id)) throw new Error("in a geojson element, id is required");
       if(!_.isString(elem.id)) throw new Error("in a geojson element, id must be a string");
@@ -197,8 +201,8 @@ module.exports = function(app){
       geojsonsToCheck.push(elem.id);
     }
     
-    //make sure there are no more than 6 elements in the object
-    if(Object.keys(obj).length != 6) throw new Error("only id, version, names, from, to, and geojson are allowed"); 
+    //make sure there are no more than 4 elements in the object
+    if(Object.keys(obj).length != 4) throw new Error("only id, version, names, and geojson are allowed"); 
     
   }
   

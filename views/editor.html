@@ -61,11 +61,11 @@
 </script>
 
 <script id="names-list-item" type="text/html">
-  <li class="list-group-item form-horizontal">
+  <li class="names-list-item list-group-item form-horizontal">
     <div class="row form-group">
       <label class="col-sm-2 control-label">Name</label>
       <div class="col-sm-10">
-        <input type="text" class="place-name-input form-control input-sm" placeholder="name" value="{{.}}">
+        <input type="text" class="place-name-input form-control input-sm" placeholder="name" value="{{name}}">
       </div>
     </div>
     <div class="date-row row form-horizontal">
@@ -102,7 +102,7 @@
   <div class="panel panel-default">
     <div class="panel-heading"><h4>Boundaries</h4></div>
     <ul class="list-group">
-      {{#geojson}}{{>geo-list-item}}{{/geojson}}
+      {{#geojsons}}{{>geo-list-item}}{{/geojsons}}
       <li id="new-geo-list-item" class="list-group-item">
         <button id="new-geo-button" class="btn btn-white btn-sm pull-right"><span class="glyphicon glyphicon-plus"></span> New Boundary</button>
       </li>
