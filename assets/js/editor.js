@@ -215,10 +215,10 @@ function getPlace(placeId){
       // geojson
       var minDate, minDateString, maxDate, maxDateString;
       
-      placeContainer.find('.geo-date-row').each(function(i){
+      placeContainer.find('.geo-list-item .date-row').each(function(i){
         
-        var fromDateString = $.trim($(this).find('.geo-date-from').val()),
-            toDateString = $.trim($(this).find('.geo-date-to').val());
+        var fromDateString = $.trim($(this).find('.date-from').val()),
+            toDateString = $.trim($(this).find('.date-to').val());
         
         if(fromDateString && toDateString){
         

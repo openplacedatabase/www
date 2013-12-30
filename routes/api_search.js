@@ -46,12 +46,12 @@ module.exports = function(app){
     if(req.query.q) {
       query = req.query.q;
     } else {
-      query = 'names:'+req.query.s;
+      query = 'names.name:'+req.query.s;
     }
     
     //setup query
     var qsQuery = ejs.QueryStringQuery(query);
-    qsQuery.defaultField('names');
+    qsQuery.defaultField('names.name');
     var r = ejs.Request().from(req.query.offset).size(req.query.count).indices('places').query(qsQuery);
     
     //call query

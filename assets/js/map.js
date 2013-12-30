@@ -181,7 +181,7 @@ function placeSearch(searchString, searchOffset, infiniteScroll, callback){
       $.each(response.data.results, function(i, result){
         
         var buttonList = $('<div class="panel-body">');
-        $.each(result.geojson, function(i, geo){
+        $.each(result.geojsons, function(i, geo){
           buttonList.append(
             $('<div class="col-sm-4 btn-col">').append(
               $('<button class="btn btn-sm btn-white">' + geo.from.substr(0,4) + '-' + geo.to.substr(0,4) + '</button>')
@@ -195,7 +195,7 @@ function placeSearch(searchString, searchOffset, infiniteScroll, callback){
         
         var names = $('<div class="panel-heading">');
         $.each(result.names, function(i, name){
-          names.append('<div class="result-name">' + name + '</div>');
+          names.append('<div class="result-name">' + name.name + '</div>');
         });
         names.append('<a class="pull-right text-muted" href="/editor#' + result.id + '">edit</a>')
         
