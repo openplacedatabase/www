@@ -5,6 +5,9 @@ var sidebar,
     deletePolygonButton,
     drawPolygonButton,
     
+    placeId,
+    selectedBoundaryId,
+    
     editing = false,
     detailChanges = false,
     shapeChanges = true,
@@ -119,7 +122,7 @@ function initialize(){
   drawingManager.setMap(map);
   
   // Remove the # from the url hash
-  var placeId = window.location.hash.slice(1);
+  placeId = window.location.hash.slice(1);
   
   // Load specified place
   if(placeId) {
@@ -133,7 +136,7 @@ function initialize(){
   //
   
   savePolygonsButton = $('#map-save-polygons-button').click(function(){
-    console.log('save map changes');
+    saveShapes();
   });
 
   editPolygonButton = $('#map-edit-polygon-button').click(function(){
@@ -262,7 +265,7 @@ function getPlace(placeId){
         data: JSON.stringify(postData),
         type: 'POST'
       }).done(function(){
-        changesSaved();
+        detailsSaved();
       }).fail(function(){
         console.error('Save failed');
       });
@@ -283,7 +286,7 @@ function getPlace(placeId){
     
     // Edit boundary button
     placeContainer.on('click', '.edit-geo-button', function(){
-      getGeoJSON(place.id, $(this).data('geo-id'));
+      selectBoundary(place.id, $(this).data('geo-id'));
     });
     
     // New geo button
@@ -307,6 +310,15 @@ function getPlace(placeId){
 };
 
 /**
+ * Fetch shapes for selected boundary and update app state
+ */
+function selectBoundary(placeId, geoId){
+  selectedBoundaryId = geoId;
+  savePolygonsButton.attr('disabled','disabled');
+  getGeoJSON(placeId, geoId);
+};
+
+/**
  * Get the geojson
  */
 function getGeoJSON(placeId, geoId){
@@ -317,7 +329,7 @@ function getGeoJSON(placeId, geoId){
   $.get('/api/v0/place/' + placeId + '/' + geoId).done(function(result){
     
     // Convert the geojson to a google maps object
-    var newShapes = new GeoJSON(result.data, basePolygonStyle);
+    var newShapes = google.maps.geojson.from(result.data, basePolygonStyle);
     
     // Handle possible conversion errors
     if(newShapes.error) {
@@ -352,11 +364,39 @@ function getGeoJSON(placeId, geoId){
 };
 
 /**
+ * Save the current state of the map
+ */
+function saveShapes(){
+  
+  savePolygonsButton.attr('disabled','disabled');
+  
+  // Convert google shapes into GeoJSON
+  var geojson = google.maps.geojson.to(shapes);
+  
+  $.ajax('/api/v0/place/' + placeId + '/' + selectedBoundaryId, {
+    contentType: 'application/json',
+    data: JSON.stringify(geojson),
+    type: 'POST'
+  }).done(function(){
+    shapesSaved();
+  }).fail(function(){
+    console.error('Save failed');
+  });
+};
+
+/**
  * Update state to reflect unsaved changes to the shapes on the map
  */
 function shapesChanged(){
   shapeChanges = true;
   savePolygonsButton.removeAttr('disabled');
+};
+
+/**
+ * Update state to reflect that changes to the shapes have been saved
+ */
+function shapesSaved(){
+  console.log('shapes saved');
 };
 
 /**
@@ -372,7 +412,7 @@ function detailsChanged(){
 /**
  * Update state to reflect that place detail changes have been saved
  */
-function changesSaved(){
+function detailsSaved(){
   detailChanges = false;
   $('#save-place-details-button').text('Saved').attr('disabled','disabled');
 };
@@ -382,6 +422,19 @@ function changesSaved(){
  */
 function enableEditing(){
   if(selectedShape){
+  
+    // Make sure the selected shape has no more than 1000 points
+    var numPoints = 0;
+    selectedShape.getPaths().forEach(function(path){
+      numPoints += path.getLength();
+    });
+    if(numPoints > 1000){
+      // Display error
+      var alert = $('<div class="map-message alert alert-danger">Cannot edit a shape with more than 1,000 points.</div>').appendTo('#map');
+      setTimeout(function(){ alert.fadeOut(function(){alert.remove();}); }, 3000);
+      return;
+    }
+  
     editing = true;
     selectedShape.setEditable(true);
     
@@ -471,8 +524,20 @@ function clearShapes(){
  * Delete the selected shape and reset map mode
  */
 function deleteSelectedShape(){
+  // Remove the shape from the map
   selectedShape.setMap(null);
+  
+  // Remove shape from shapes array
+  for(var i = 0; i < shapes.length; i++){
+    if(shapes[i] === selectedShape){
+      shapes.splice(i,1);
+      break;
+    }
+  }
+  
+  // Update state
   clearSelection();
+  shapesChanged();
   disableShapeOperationButtons();
   enableDrawingModeButtons();
 };

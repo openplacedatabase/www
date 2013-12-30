@@ -42,3 +42,9 @@
 #save-place-details-button {
   visibility: hidden;
 }
+
+.map-message {
+  position: absolute;
+  left: 175px;
+  top: 5px;
+}

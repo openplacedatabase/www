@@ -276,7 +276,7 @@ function getGeoJSON(placeId, geoId){
   $.get('/api/v0/place/' + placeId + '/' + geoId).done(function(result){
     
     // Convert the geojson to a google maps object
-    var newShapes = new GeoJSON(result.data, googleShapeOptions);
+    var newShapes = google.maps.geojson.from(result.data, googleShapeOptions);
     
     // Handle possible conversion errors
     if(newShapes.error) {
