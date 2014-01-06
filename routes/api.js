@@ -8,7 +8,7 @@ module.exports = function(app){
       mkdirp = require('mkdirp'),
       check = require('validator').check;
   
-  // Get a place json file
+  // Get a place json or geojson file
   app.get('/api/v0/place/:id/:geo?', function(req, res){
     
     if(!req.params.geo) {
@@ -32,7 +32,7 @@ module.exports = function(app){
     
   });
   
-  // Delete a place json file
+  // Delete a place json or geojson file
   app.delete('/api/v0/place/:id/:geo?', function(req, res){
     
     if(!req.params.geo) {

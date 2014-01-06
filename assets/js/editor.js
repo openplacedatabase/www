@@ -225,6 +225,18 @@ function getPlace(placeId){
       detailsChanged();
     });
     
+    // Delete source button
+    placeContainer.on('click', '.delete-source-button', function(){
+      $(this).closest('.list-group-item').remove();
+      detailsChanged();
+    });
+    
+    // New source button
+    $('#new-source-button').click(function(){
+      detailsChanged();
+      $('#new-source-list-item').before($.Mustache.render('sources-list-item'));
+    });
+    
     // Download geojson button
     placeContainer.on('click', '.download-geojson-button', function(){
       var geoId = $(this).closest('.geo-list-item').data('geo-id');
@@ -244,6 +256,28 @@ function getPlace(placeId){
     // Finalize upload
     $('#upload-save-button').click(uploadGeojson);
     
+    // Delete dialog button
+    $('#delete-place-dialog-button').click(function(){
+      $('#delete-place-dialog').modal('show');
+    });
+    
+    // Final delete button
+    $('#delete-place-button').click(deletePlace);
+    
+  }).fail(function(xhr, error, status){
+    var error = '';
+    
+    // Display message saying we couldn't find the place
+    if(xhr.status === 404){
+      error = 'This place no longer exists.';
+    }
+    
+    // Generic error message for all other errors
+    else {
+      error = 'Unable to retrieve the place: ' + status;
+    }
+    
+    sidebar.html('<div class="alert alert-danger">' + error + '</div>');
   });
 
 };
@@ -431,8 +465,8 @@ function savePlaceDetails(){
   });
   
   // sources
-  sidebar.find('.source-list-item').each(function(){
-    postData.sources.push($.trim($(this).text()));
+  sidebar.find('.place-source-input').each(function(){
+    postData.sources.push($.trim($(this).val()));
   });
   
   console.log(postData);
@@ -517,6 +551,20 @@ function detailsChanged(){
 function detailsSaved(){
   detailChanges = false;
   $('#save-place-details-button').text('Saved').attr('disabled','disabled');
+};
+
+/**
+ * Issue a query to delete the place
+ */
+function deletePlace(){
+  $.ajax({
+    url: '/api/v0/place/' + placeId,
+    type: 'DELETE'
+  }).done(function(){
+    window.location = '/map';
+  }).fail(function(){
+    console.error('failed to delete the place');
+  });
 };
 
 /**
