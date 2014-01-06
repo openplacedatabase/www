@@ -19,7 +19,7 @@ module.exports = function(app){
   /**
    * Map for editing shapes
    */
-  app.get('/editor', function(req, res){
+  app.get('/editor/:place_id', function(req, res){
     var data = {
       css: ['/assets/css/editor.css'],
       js: [
@@ -30,7 +30,8 @@ module.exports = function(app){
         '/assets/vendor/js/jquery.mustache.js',
         '/assets/js/editor.js'
       ],
-      google_key: process.env.OPD_GOOGLE_API_KEY
+      google_key: process.env.OPD_GOOGLE_API_KEY,
+      place_id: req.params.place_id
     };
     res.render('editor', data);
   });

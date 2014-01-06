@@ -43,10 +43,6 @@
   padding-top: 4px;
 }
 
-#save-place-details-button {
-  visibility: hidden;
-}
-
 .map-message {
   position: absolute;
   left: 175px;

@@ -197,7 +197,7 @@ function placeSearch(searchString, searchOffset, infiniteScroll, callback){
         $.each(result.names, function(i, name){
           names.append('<div class="result-name">' + name.name + '</div>');
         });
-        names.append('<a class="pull-right text-muted" href="/editor#' + result.id + '">edit</a>')
+        names.append('<a class="pull-right text-muted" href="/editor/' + result.id + '">edit</a>')
         
         var resultCard = $('<div class="panel panel-default">')
           .append(names)

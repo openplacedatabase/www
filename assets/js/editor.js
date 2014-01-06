@@ -7,7 +7,6 @@ var NEW_GEO_CLASS = 'new-geo',
     deletePolygonButton,
     drawPolygonButton,
     
-    placeId,
     selectedBoundaryId,
     
     editing = false,
@@ -123,15 +122,9 @@ function initialize(){
   drawingManager = new google.maps.drawing.DrawingManager(drawingControlOptions);
   drawingManager.setMap(map);
   
-  // Remove the # from the url hash
-  placeId = window.location.hash.slice(1);
-  
   // Load specified place
-  if(placeId) {
-    getPlace(placeId);
-  } else {
-    sidebar.html('<div class="alert alert-danger">No place was selected for editing. Return to the <a href="/map">search</a> page to select a place for editing.</div>');
-  }
+  // placeId is set by the html template in a separate script
+  getPlace(placeId);
   
   //
   // Setup custom map controls
@@ -196,7 +189,7 @@ function getPlace(placeId){
     });
     
     // Save button
-    $('#save-place-details-button').click(savePlaceDetails);
+    $('#save-place-details-button').click(savePlaceDetails).attr('disabled','disabled').text('Saved');
     
     // Delete name button
     placeContainer.on('click', '.delete-name-button', function(){
