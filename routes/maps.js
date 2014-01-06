@@ -9,7 +9,8 @@ module.exports = function(app){
       js: [
         'https://maps.googleapis.com/maps/api/js?sensor=false&key=' + process.env.OPD_GOOGLE_API_KEY,
         '/assets/vendor/js/geojson-google-maps-from.js',
-        '/assets/js/map.js'
+        '/assets/vendor/js/uuid.js',
+        '/assets/js/map.js'        
       ],
       google_key: process.env.OPD_GOOGLE_API_KEY
     };

@@ -68,16 +68,39 @@ $(document).ready(function(){
   
   // Perform a search when the search button is clicked or the
   // enter key is pressed when the search input has focus
-  
   $('#search-button').click(function(){
     placeSearch(searchInput.val(), 0, false);
   });
-  
   searchInput.keypress(function(e) {
-    // Enter pressed
     if(e.which == 13) {
       placeSearch(searchInput.val(), 0, false);
     }
+  });
+  
+  // New place button
+  $('#new-place-button').click(function(){
+    
+    var placeId = uuid.v4();
+    
+    // Save empty place object
+    $.ajax('/api/v0/place/' + placeId, {
+      contentType: 'application/json',
+      data: JSON.stringify({
+        id: placeId,
+        version: 1,
+        names: [],
+        geojsons: [],
+        sources: []
+      }),
+      type: 'POST'
+    }).done(function(){
+      window.location = '/editor/' + placeId;
+    }).fail(function(){
+      console.error('Failed to create a new place');
+    });
+    
+    // Forward user to the edit page
+    
   });
   
   processHashChange();

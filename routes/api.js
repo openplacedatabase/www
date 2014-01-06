@@ -99,8 +99,9 @@ module.exports = function(app){
     }
     
     async.auto({
-      fileExists:function(callback) {
-        // If old file exists, rename it
+    
+      // If old file exists, rename it
+      fileExists: function(callback) {
         fs.exists(filename,function(exists) {
           if(exists) {
             fs.rename(filename,filename+'.'+Date.now(),function(error) {
@@ -111,7 +112,9 @@ module.exports = function(app){
           }
         });
       },
-      dirExists:function(callback) {
+      
+      // Make sure the directories exist
+      dirExists: function(callback) {
         fs.exists(filepath,function(exists) {
           if(exists) {
             return callback(null);
@@ -122,11 +125,14 @@ module.exports = function(app){
           }
         });
       },
-      saveFile:['fileExists','dirExists',function(callback) {
+      
+      // Save the file
+      saveFile: ['fileExists','dirExists',function(callback) {
         fs.writeFile(filename,JSON.stringify(req.body),function(error) {
           return callback(error);
         });
       }]
+      
     },function(error,callback) {
       if(error) {
         console.error(error);
@@ -206,7 +212,7 @@ module.exports = function(app){
     }
     
     //make sure there are no more than 5 elements in the object
-    if(Object.keys(obj).length != 5) throw new Error("only id, version, names, sources, and geojson are allowed"); 
+    if(Object.keys(obj).length != 5) throw new Error("only id, version, names, sources, and geojsons are allowed"); 
     
   }
   

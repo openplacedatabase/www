@@ -200,7 +200,11 @@ function getPlace(placeId){
     // New name button
     $('#new-name-button').click(function(){
       detailsChanged();
-      $('#new-name-list-item').before($.Mustache.render('names-list-item'));
+      $('#new-name-list-item').before($.Mustache.render('names-list-item', {
+        from: '',
+        to: '',
+        name: ''
+      }));
     });
     
     // View boundary button
