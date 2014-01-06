@@ -376,7 +376,7 @@ function addNewBoundary(){
   // Set the id of the new boundary to one greater
   // than the last boundary in the list
   var lastGeo = $('#new-geo-list-item').prev(),
-      newId = parseInt(lastGeo.data('geo-id')) + 1;
+      newId = lastGeo.length ? parseInt(lastGeo.data('geo-id')) + 1 : 1;
   
   // Insert new HTML
   var newGeo = $($.Mustache.render('geo-list-item', {
