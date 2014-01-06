@@ -13,6 +13,7 @@ app.set('view engine', 'html');
 
 // Use cookies
 app.use(express.cookieParser());
+app.use(require(__dirname + '/lib/options.js'));
 
 // Make the request body available as text instead of a stream
 app.use(express.bodyParser());

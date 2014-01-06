@@ -31,6 +31,7 @@
   position: absolute;
   left: 355px;
   top: 5px;
+  display: none;
 }
 
 #load-bar {

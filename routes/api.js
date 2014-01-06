@@ -6,7 +6,8 @@ module.exports = function(app){
       async = require('async'),
       geoAssert = require('geojson-assert'),
       mkdirp = require('mkdirp'),
-      check = require('validator').check;
+      check = require('validator').check,
+      restrict = require(__dirname + '/../lib/restrict.js');
   
   // Get a place json or geojson file
   app.get('/api/v0/place/:id/:geo?', function(req, res){
@@ -33,7 +34,7 @@ module.exports = function(app){
   });
   
   // Delete a place json or geojson file
-  app.delete('/api/v0/place/:id/:geo?', function(req, res){
+  app.delete('/api/v0/place/:id/:geo?', restrict, function(req, res){
     
     if(!req.params.geo) {
       var id = req.params.id;
@@ -63,7 +64,7 @@ module.exports = function(app){
   });
   
   // Create or update a place or geojson
-  app.post('/api/v0/place/:id/:geo?', function(req, res){
+  app.post('/api/v0/place/:id/:geo?', restrict, function(req, res){
     
     // Check json object
     var obj = req.body;

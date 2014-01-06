@@ -78,30 +78,29 @@ $(document).ready(function(){
   });
   
   // New place button
-  $('#new-place-button').click(function(){
-    
-    var placeId = uuid.v4();
-    
-    // Save empty place object
-    $.ajax('/api/v0/place/' + placeId, {
-      contentType: 'application/json',
-      data: JSON.stringify({
-        id: placeId,
-        version: 1,
-        names: [],
-        geojsons: [],
-        sources: []
-      }),
-      type: 'POST'
-    }).done(function(){
-      window.location = '/editor/' + placeId;
-    }).fail(function(){
-      console.error('Failed to create a new place');
-    });
-    
-    // Forward user to the edit page
-    
-  });
+  if(editing){
+    $('#new-place-button').click(function(){
+      
+      var placeId = uuid.v4();
+      
+      // Save empty place object
+      $.ajax('/api/v0/place/' + placeId, {
+        contentType: 'application/json',
+        data: JSON.stringify({
+          id: placeId,
+          version: 1,
+          names: [],
+          geojsons: [],
+          sources: []
+        }),
+        type: 'POST'
+      }).done(function(){
+        window.location = '/editor/' + placeId;
+      }).fail(function(){
+        console.error('Failed to create a new place');
+      });
+    }).show();
+  }
   
   processHashChange();
 
@@ -220,7 +219,9 @@ function placeSearch(searchString, searchOffset, infiniteScroll, callback){
         $.each(result.names, function(i, name){
           names.append('<div class="result-name">' + name.name + '</div>');
         });
-        names.append('<a class="pull-right text-muted" href="/editor/' + result.id + '">edit</a>')
+        if(editing){
+          names.append('<a class="pull-right text-muted" href="/editor/' + result.id + '">edit</a>');
+        }
         
         var resultCard = $('<div class="panel panel-default">')
           .append(names)

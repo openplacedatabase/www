@@ -1,3 +1,5 @@
+var restrict = require(__dirname + '/../lib/restrict.js');
+
 module.exports = function(app){
 
   /**
@@ -12,7 +14,8 @@ module.exports = function(app){
         '/assets/vendor/js/uuid.js',
         '/assets/js/map.js'        
       ],
-      google_key: process.env.OPD_GOOGLE_API_KEY
+      google_key: process.env.OPD_GOOGLE_API_KEY,
+      editing: req.cookies['opd-session'] ? true : false
     };
     res.render('map', data);
   });
@@ -20,7 +23,7 @@ module.exports = function(app){
   /**
    * Map for editing shapes
    */
-  app.get('/editor/:place_id', function(req, res){
+  app.get('/editor/:place_id', restrict, function(req, res){
     var data = {
       css: ['/assets/css/editor.css'],
       js: [
