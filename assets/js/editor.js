@@ -383,7 +383,7 @@ function addNewBoundary(){
     from: '',
     to: '',
     id: newId
-  })).insertAfter(lastGeo).addClass(NEW_GEO_CLASS);
+  })).insertBefore($(this).closest('.list-group-item')).addClass(NEW_GEO_CLASS);
   
   // Disable download geo-json until the shapes have been saved
   newGeo.find('.download-geojson-button').attr('disabled','disabled');
