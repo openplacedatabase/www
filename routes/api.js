@@ -19,7 +19,7 @@ module.exports = function(app){
   }
   
   // Get a place json or geojson file
-  app.get('/api/v0/place/:id/:geo?', function(req, res){
+  app.get('/api/v0/place/:id/:geo?', function(req, res) {
     
     var id = req.params.id + ((req.params.geo)?'/'+req.params.geo:'');
     
@@ -36,14 +36,15 @@ module.exports = function(app){
   });
   
   // Delete a place json or geojson file
-  //app.delete('/api/v0/place/:id/:geo?', restrict, function(req, res){
-  app.delete('/api/v0/place/:id/:geo?', function(req, res){
+  //app.delete('/api/v0/place/:id/:geo?', restrict, function(req, res) {
+  app.delete('/api/v0/place/:id/:geo?', function(req, res) {
     
     var isPlace = false;
     if(!req.params.geo) isPlace = true;
     var id = req.params.id + ((req.params.geo)?'/'+req.params.geo:'');
+    var timestamp = Date.now();
     
-    backing.deleteId(id,function(error,data) {
+    backing.deleteId(id, timestamp, function(error,data) {
       if(error) {
         res.status(error);
         res.json(apiReturn(false, error));
@@ -72,11 +73,13 @@ module.exports = function(app){
   });
   
   // Create or update a place or geojson
-  //app.post('/api/v0/place/:id/:geo?', restrict, function(req, res){
-  app.post('/api/v0/place/:id/:geo?', function(req, res){
+  //app.post('/api/v0/place/:id/:geo?', restrict, function(req, res) {
+  app.post('/api/v0/place/:id/:geo?', function(req, res) {
     
     var isPlace = false;
     var id = req.params.id + ((req.params.geo)?'/'+req.params.geo:'');
+    
+    var timestamp = Date.now();
     
     //console.log(req.body);
     
@@ -90,7 +93,7 @@ module.exports = function(app){
       }
     } else {
       isPlace = true;
-      req.body.last_edited_time = Date.now();
+      req.body.last_edited_time = timestamp;
       req.body.last_edited_by = 'User 0';
       try {
         validate.validPlace(id, req.body);
@@ -103,7 +106,7 @@ module.exports = function(app){
     }
     
     // Save object
-    backing.updateId(id, req.body, function(error,data) {
+    backing.updateId(id, req.body, timestamp, function(error,data) {
       if(error) {
         res.status(error);
         res.json(apiReturn(false, error));
