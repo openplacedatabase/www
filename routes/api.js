@@ -3,16 +3,19 @@ module.exports = function(app){
   var _ = require('underscore')._,
       elasticsearch = require('elasticsearch'),
       esClient = new elasticsearch.Client({
-        host: 'localhost:9200'
+        host: app.locals.settings.elasticsearch_host+':'+app.locals.settings.elasticsearch_port
       }),
       restrict = require(__dirname + '/../lib/restrict.js'),
       validate = require(__dirname + '/../lib/validate.js');
   
   // Load backing based on setting
   if(app.locals.settings.backing == 's3') {
-    var backing = require(__dirname + '/../lib/backing-s3.js')();
+    var backing = require(__dirname + '/../lib/backing-s3.js')({
+      bucket: app.locals.settings.s3_bucket,
+      prefix: app.locals.settings.s3_prefix
+    });
   } else {
-    var backing = require(__dirname + '/../lib/backing-fs.js')();
+    var backing = require(__dirname + '/../lib/backing-fs.js')(app.locals.settings.fs_directory);
   }
   
   // Get a place json or geojson file

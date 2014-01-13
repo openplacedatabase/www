@@ -3,7 +3,7 @@ module.exports = function(app){
   //setup elasticsearch
   var elasticsearch = require('elasticsearch'),
       esClient = new elasticsearch.Client({
-        host: 'localhost:9200'
+        host: app.locals.settings.elasticsearch_host+':'+app.locals.settings.elasticsearch_port
       }),
        _ = require('underscore')._;
   
