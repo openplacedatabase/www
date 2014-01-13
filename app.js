@@ -18,6 +18,11 @@ app.use(require(__dirname + '/lib/options.js'));
 // Make the request body available as text instead of a stream
 app.use(express.bodyParser());
 
+// Load settings into app.locals
+app.locals.settings = {
+  backing: 's3', // Options are s3 or fs
+  backing_location: 'opd-data'
+}
 
 
 /**

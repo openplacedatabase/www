@@ -12,6 +12,7 @@
     "geojson-assert":"0.0.x",
     "mkdirp":"0.3.x",
     "validator":"2.0.x",
-    "elastic.js": "1.1.x"
+    "elastic.js": "1.1.x",
+    "aws-sdk": "2.0.x"
   }
 }
