@@ -4,7 +4,7 @@ module.exports = function(app){
       elasticsearch = require('elasticsearch'),
       esClient = new elasticsearch.Client({
         host: 'localhost:9200'
-      })
+      }),
       restrict = require(__dirname + '/../lib/restrict.js'),
       validate = require(__dirname + '/../lib/validate.js');
   

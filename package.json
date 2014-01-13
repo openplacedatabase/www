@@ -14,6 +14,8 @@
     "validator":"2.0.x",
     "elastic.js": "1.1.x",
     "aws-sdk": "2.0.x",
-    "elasticsearch": "1.0.x"
+    "elasticsearch": "1.0.x",
+    "optimist": "0.6.x",
+    "readdirp": "0.3.3"
   }
 }
