@@ -1,6 +1,11 @@
 module.exports = function(app){
   
-  var restrict = require(__dirname + '/../lib/restrict.js'),
+  var _ = require('underscore')._,
+      elasticsearch = require('elasticsearch'),
+      esClient = new elasticsearch.Client({
+        host: 'localhost:9200'
+      })
+      restrict = require(__dirname + '/../lib/restrict.js'),
       validate = require(__dirname + '/../lib/validate.js');
   
   // Load backing based on setting
@@ -31,6 +36,8 @@ module.exports = function(app){
   //app.delete('/api/v0/place/:id/:geo?', restrict, function(req, res){
   app.delete('/api/v0/place/:id/:geo?', function(req, res){
     
+    var isPlace = false;
+    if(!req.params.geo) isPlace = true;
     var id = req.params.id + ((req.params.geo)?'/'+req.params.geo:'');
     
     backing.deleteId(id,function(error,data) {
@@ -38,7 +45,24 @@ module.exports = function(app){
         res.status(error);
         res.json(apiReturn(false, error));
       } else {
-        res.json(apiReturn(true));
+      
+        // Remove from elasticsearch if place
+        if(isPlace) {
+          esClient.delete({
+            index: 'places-test',
+            type: 'place',
+            id: id
+          }, function (error, response) {
+            if(error && error.message != 'Not Found') {
+              res.status(500);
+              res.json(apiReturn(false, 500, "Internal Server Error - Elasticsearch failure"));
+            } else {
+              res.json(apiReturn(true));
+            }
+          });
+        } else {
+          res.json(apiReturn(true));
+        }
       }
     });
     
@@ -48,6 +72,7 @@ module.exports = function(app){
   //app.post('/api/v0/place/:id/:geo?', restrict, function(req, res){
   app.post('/api/v0/place/:id/:geo?', function(req, res){
     
+    var isPlace = false;
     var id = req.params.id + ((req.params.geo)?'/'+req.params.geo:'');
     
     //console.log(req.body);
@@ -61,6 +86,7 @@ module.exports = function(app){
         return res.json(apiReturn(false, 400,error.message));
       }
     } else {
+      isPlace = true;
       req.body.last_edited_time = Date.now();
       req.body.last_edited_by = 'User 0';
       try {
@@ -79,7 +105,26 @@ module.exports = function(app){
         res.status(error);
         res.json(apiReturn(false, error));
       } else {
-        res.json(apiReturn(true));
+        
+        // Update elasticsearch if isPlace
+        if(isPlace) {
+          esClient.index({
+            index: 'places-test',
+            type: 'place',
+            id: id,
+            body: req.body
+          }, function (error, response) {
+            if(error) {
+              console.log(error);
+              res.status(500);
+              res.json(apiReturn(false, 500, "Internal Server Error - Elasticsearch failure"));
+            } else {
+              res.json(apiReturn(true));
+            }
+          });
+        } else {
+          res.json(apiReturn(true));
+        }
       }
     });
     
