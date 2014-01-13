@@ -1,11 +1,11 @@
 module.exports = function(app){
 
   //setup elasticsearch
-  var ejs = require('elastic.js'),
-      nc = require('elastic.js/elastic-node-client'),
+  var elasticsearch = require('elasticsearch'),
+      esClient = new elasticsearch.Client({
+        host: 'localhost:9200'
+      }),
        _ = require('underscore')._;
-      
-  ejs.client = nc.NodeClient('localhost',9200);
   
   
   //define routes
@@ -46,33 +46,28 @@ module.exports = function(app){
     if(req.query.q) {
       query = req.query.q;
     } else {
-      query = 'names.name:'+req.query.s;
+      query = 'place.names.name:'+req.query.s;
     }
     
-    //setup query
-    var qsQuery = ejs.QueryStringQuery(query);
-    qsQuery.defaultField('names.name');
-    var r = ejs.Request().from(req.query.offset).size(req.query.count).indices('places').query(qsQuery);
     
-    //call query
-    r.doSearch(function(esResults) {
-      //verify search was good
-      if (!esResults.hits) {
-        console.error('Error: GET /api/v0/search/places - Elasticsearch Error, missing hits object');
+    esClient.search({
+      index: 'places-test',
+      q: query
+    }, function (error, response) {
+      if(error) {
+        console.log(error);
+        console.error('Error: GET /api/v0/search/places - Elasticsearch Error');
         res.status(500);
         return res.json(apiReturn(false, 500,"Internal Error"));
+      } else {
+        var ret = {total:response.hits.total,results:[]};
+        for(x in response.hits.hits) {
+          ret.results.push(response.hits.hits[x]._source);
+        }
+        return res.json(apiReturn(ret));
       }
-      
-      //search was good and we have results.
-      var ret = {total:esResults.hits.total,results:[]};
-      for(x in esResults.hits.hits) {
-        ret.results.push(esResults.hits.hits[x]._source);
-      }
-      
-      return res.json(apiReturn(ret));
-      
-      
-    }); //end elasticsearch callback
+    });
+    
 
   });
   
