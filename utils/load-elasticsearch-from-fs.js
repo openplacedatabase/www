@@ -1,13 +1,14 @@
-var argv = require('optimist').argv,
-    async = require('async'),
+var async = require('async'),
     path = require('path'),
     fs = require('fs'),
     readdirp = require('readdirp'),
     elasticsearch = require('elasticsearch'),
     esClient = new elasticsearch.Client({
       host: 'localhost:9200'
-    });
-
+    }),
+    argv = require('optimist')
+      .default('i','places')
+      .argv;
 
 if(argv._.length !== 1) {
   console.log('Usage: node utils/init-elasticsearch-from-fs.js from-dir');
@@ -83,7 +84,7 @@ function processPlace(json, callback) {
   
   outstandingCalls++;
   esClient.index({
-    index: 'places-test',
+    index: argv.i,
     type: 'place',
     id: json.id,
     body: json
