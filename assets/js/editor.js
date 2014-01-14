@@ -575,43 +575,112 @@ function enableEditing(){
     selectedShape.getPaths().forEach(function(path){
       numPoints += path.getLength();
     });
-    if(numPoints > 1000){
-      // Display error
-      var alert = $('<div class="map-message alert alert-danger">Cannot edit a shape with more than 1,000 points.</div>').appendTo('#map');
-      setTimeout(function(){ alert.fadeOut(function(){alert.remove();}); }, 3000);
-      return;
-    }
+    if(numPoints > 500){
+      shapeToLines(selectedShape, 500);
+    } else {
   
-    editing = true;
-    selectedShape.setEditable(true);
-    
-    // Listen for changes to the points
-    selectedShape.getPaths().forEach(function(path, index){
-      google.maps.event.addListener(path, 'insert_at', function(){
-        shapesChanged();
+      editing = true;
+      selectedShape.setEditable(true);
+      
+      // Listen for changes to the points
+      selectedShape.getPaths().forEach(function(path, index){
+        google.maps.event.addListener(path, 'insert_at', function(){
+          shapesChanged();
+        });
+        google.maps.event.addListener(path, 'remove_at', function(){
+          shapesChanged();
+        });
+        google.maps.event.addListener(path, 'set_at', function(){
+          shapesChanged();
+        });
       });
-      google.maps.event.addListener(path, 'remove_at', function(){
-        shapesChanged();
-      });
-      google.maps.event.addListener(path, 'set_at', function(){
-        shapesChanged();
-      });
-    });
-    
-    // Enable polygon vertexes to be deleted.
-    // Inspired by http://stackoverflow.com/a/14441786/879121
-    selectedShape.addListener('rightclick', function(event){
-      if(event.path != null && event.vertex != null){
-        var path = this.getPaths().getAt(event.path);
-        if(path.getLength() > 3){
-          path.removeAt(event.vertex);
-        } else {
-          this.getPaths().removeAt(event.path);
+      
+      // Enable polygon vertexes to be deleted.
+      // Inspired by http://stackoverflow.com/a/14441786/879121
+      selectedShape.addListener('rightclick', function(event){
+        if(event.path != null && event.vertex != null){
+          var path = this.getPaths().getAt(event.path);
+          if(path.getLength() > 3){
+            path.removeAt(event.vertex);
+          } else {
+            this.getPaths().removeAt(event.path);
+          }
+          shapesChanged();
         }
-        shapesChanged();
-      }
-    });
+      });
+    }
   }
+};
+
+/**
+ * Split a shape into lines of no more than the given 
+ * number of points. End points of the lines should overlap
+ * to give the appearance of a closed polygon
+ */
+function shapeToLines(shape, maxPoints){
+  selectedShape.getPaths().forEach(function(path, pathIndex){
+    
+    // Calculate length of each line
+    var lineLength = Math.ceil(path.getLength() / Math.ceil(path.getLength() / maxPoints)),
+        numChunks = Math.ceil(path.getLength() / lineLength),
+        lines = [];
+    
+    // Create new lines
+    for(var i = 0; i < numChunks; i++){
+      var newLinePath = [],
+          start = i * lineLength,
+          end = Math.min((i + 1) * lineLength, path.getLength()-1);
+      for(var j = start; j <= end; j++){
+        newLinePath.push(path.getAt(j));
+      }
+      var line = new google.maps.Polyline({ 
+        path: newLinePath, 
+        map: map
+      });
+      //line.setOptions(selectedPolygonStyle);
+      line.addListener('click', function(){
+        this.setEditable(true);
+      });
+      lines.push(line);
+    }
+    
+    // Add first point to last line
+    lines[lines.length-1].getPath().push(path.getAt(0));
+
+    // Add event listeners after modifying the last line
+    $.each(lines, function(i, line){
+      line.getPath().addListener('insert_at', function(){
+        updateShape(shape, pathIndex, lines);
+      });
+      line.getPath().addListener('remove_at', function(){
+        updateShape(shape, pathIndex, lines);
+      });
+      line.getPath().addListener('set_at', function(){
+        updateShape(shape, pathIndex, lines);
+      });
+    });
+  });
+  
+  /** 
+   * Called whenever lines change; updates the specified
+   * path of the shape based on the lines that were
+   * derived from it
+   */
+  function updateShape(shape, pathIndex, lines){
+    var newPoints = [];
+    for(var i = 0; i < lines.length; i++){
+      var linePath = lines[i].getPath(),
+          lineLength = linePath.getLength();
+      linePath.forEach(function(point, j){
+        // Don't add the last point of each line
+        // because those are duplicated
+        if(j !== lineLength - 1){
+          newPoints.push(point);
+        }
+      });
+    }
+    shape.getPaths().setAt(pathIndex, new google.maps.MVCArray(newPoints));
+  };
 };
 
 /**
