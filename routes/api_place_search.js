@@ -5,7 +5,8 @@ module.exports = function(app){
       esClient = new elasticsearch.Client({
         host: app.locals.settings.elasticsearch_host+':'+app.locals.settings.elasticsearch_port
       }),
-       _ = require('underscore')._;
+       _ = require('underscore')._,
+       api = require(__dirname + '/../lib/api.js');
   
   
   //define routes
@@ -13,18 +14,18 @@ module.exports = function(app){
     
     if(!req.query.q && !req.query.s) {
       res.status(400);
-      return res.json(apiReturn(false, 400,"Parameter q or s is required"));
+      return res.json(api.format_return(false, 400,"Parameter q or s is required"));
     }
     
     if(!req.query.q && !req.query.s) {
       res.status(400);
-      return res.json(apiReturn(false, 400,"Parameter q or s is required"));
+      return res.json(api.format_return(false, 400,"Parameter q or s is required"));
     }
     
     if(req.query.count) {
       if( _.isNaN(req.query.count) || req.query.count < 1 || req.query.count > 100) {
         res.status(400);
-        return res.json(apiReturn(false, 400,"Parameter count must be a number and between 1 (inclusive) and 100 (inclusive)"));
+        return res.json(api.format_return(false, 400,"Parameter count must be a number and between 1 (inclusive) and 100 (inclusive)"));
       }
     } else {
       req.query.count = 10;
@@ -34,7 +35,7 @@ module.exports = function(app){
       req.query.offset = parseInt(req.query.offset);
       if( _.isNaN(req.query.offset) || req.query.offset < 0) {
         res.status(400);
-        return res.json(apiReturn(false, 400,"Parameter offset must be a number and greater than 0 (inclusive)"));
+        return res.json(api.format_return(false, 400,"Parameter offset must be a number and greater than 0 (inclusive)"));
       }
     } else {
       req.query.offset = 0;
@@ -58,41 +59,17 @@ module.exports = function(app){
         console.log(error);
         console.error('Error: GET /api/v0/search/places - Elasticsearch Error');
         res.status(500);
-        return res.json(apiReturn(false, 500,"Internal Error"));
+        return res.json(api.format_return(false, 500,"Internal Error"));
       } else {
         var ret = {total:response.hits.total,results:[]};
         for(x in response.hits.hits) {
           ret.results.push(response.hits.hits[x]._source);
         }
-        return res.json(apiReturn(ret));
+        return res.json(api.format_return(ret));
       }
     });
     
 
   });
-  
-  function apiReturn(data, code, msg) {
-  
-    if(!data) data = false;
-  
-    if(!code) code = 200;
-  
-    var msgs = [];
-    if(msg) {
-      if(_.isArray(msg)) {
-        msgs = msg;
-      } else {
-        msgs.push(msg);
-      }
-    }
-  
-    return {
-      status:{
-        code:code,
-        msgs:msgs
-      },
-      data:data
-    }
-  }
 
 };

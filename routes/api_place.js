@@ -6,7 +6,8 @@ module.exports = function(app){
         host: app.locals.settings.elasticsearch_host+':'+app.locals.settings.elasticsearch_port
       }),
       restrict = require(__dirname + '/../lib/restrict.js'),
-      validate = require(__dirname + '/../lib/validate.js');
+      validate = require(__dirname + '/../lib/validate.js'),
+      api = require(__dirname + '/../lib/api.js');
   
   // Load backing based on setting
   if(app.locals.settings.backing == 's3') {
@@ -37,9 +38,9 @@ module.exports = function(app){
       if(error) {
         console.log(error);
         res.status(404);
-        res.json(apiReturn(false, 404,"Not Found"));
+        res.json(api.format_return(false, 404,"Not Found"));
       } else {
-        res.json(apiReturn(data));
+        res.json(api.format_return(data));
       }
     });
     
@@ -58,12 +59,12 @@ module.exports = function(app){
     logging.log(id, timestamp, function(error) {
       if(error) {
         res.status(error);
-        res.json(apiReturn(false, error));
+        res.json(api.format_return(false, error));
       } else {
         backing.deleteId(id, timestamp, function(error,data) {
           if(error) {
             res.status(error);
-            res.json(apiReturn(false, error));
+            res.json(api.format_return(false, error));
           } else {
       
             // Remove from elasticsearch if place
@@ -75,13 +76,13 @@ module.exports = function(app){
               }, function (error, response) {
                 if(error && error.message != 'Not Found') {
                   res.status(500);
-                  res.json(apiReturn(false, 500, "Internal Server Error - Elasticsearch failure"));
+                  res.json(api.format_return(false, 500, "Internal Server Error - Elasticsearch failure"));
                 } else {
-                  res.json(apiReturn(true));
+                  res.json(api.format_return(true));
                 }
               });
             } else {
-              res.json(apiReturn(true));
+              res.json(api.format_return(true));
             }
           }
         });
@@ -106,7 +107,7 @@ module.exports = function(app){
         validate.validGeoJSON(req.body);
       } catch(error) {
         res.status(400);
-        return res.json(apiReturn(false, 400,error.message));
+        return res.json(api.format_return(false, 400,error.message));
       }
     } else {
       isPlace = true;
@@ -118,7 +119,7 @@ module.exports = function(app){
         //console.log(error);
         //console.log(error.stack);
         res.status(400);
-        return res.json(apiReturn(false, 400,error.message));
+        return res.json(api.format_return(false, 400,error.message));
       }
     }
     
@@ -126,13 +127,13 @@ module.exports = function(app){
     logging.log(id, timestamp, function(error) {
       if(error) {
         res.status(error);
-        res.json(apiReturn(false, error));
+        res.json(api.format_return(false, error));
       } else {
         // Save object
         backing.updateId(id, req.body, timestamp, function(error,data) {
           if(error) {
             res.status(error);
-            res.json(apiReturn(false, error));
+            res.json(api.format_return(false, error));
           } else {
         
             // Update elasticsearch if isPlace
@@ -146,13 +147,13 @@ module.exports = function(app){
                 if(error) {
                   console.log(error);
                   res.status(500);
-                  res.json(apiReturn(false, 500, "Internal Server Error - Elasticsearch failure"));
+                  res.json(api.format_return(false, 500, "Internal Server Error - Elasticsearch failure"));
                 } else {
-                  res.json(apiReturn(true));
+                  res.json(api.format_return(true));
                 }
               });
             } else {
-              res.json(apiReturn(true));
+              res.json(api.format_return(true));
             }
           }
         });
@@ -160,32 +161,5 @@ module.exports = function(app){
     });
     
   });
-  
-  /**
-   * Format the API return
-   */
-  function apiReturn(data, code, msg) {
-  
-    if(!data) data = false;
-  
-    if(!code) code = 200;
-  
-    var msgs = [];
-    if(msg) {
-      if(_.isArray(msg)) {
-        msgs = msg;
-      } else {
-        msgs.push(msg);
-      }
-    }
-  
-    return {
-      status:{
-        code:code,
-        msgs:msgs
-      },
-      data:data
-    }
-  }
   
 };
