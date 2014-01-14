@@ -2,6 +2,8 @@
 
 An effort to provide historical boundary shapes for places worldwide in an easily consumable format.
 
+![](https://david-dm.org/openplacedatabase/www.png)
+
 ## License
 
 Apache 2
