@@ -6,9 +6,13 @@ var express = require('express'),
 // Load settings into app.locals
 app.locals.settings = {
   backing: (process.env.OPD_BACKING)?process.env.OPD_BACKING:'fs', // Options are s3 or fs
-  fs_directory: (process.env.OPD_BACKING_FS_DIR)?process.env.OPD_BACKING:path.join(__dirname,'data'),
-  s3_bucket: (process.env.OPD_BACKING_S3_BUCKET)?process.env.OPD_BACKING_S3_BUCKET:'',
-  s3_prefix: (process.env.OPD_BACKING_S3_PREFIX)?process.env.OPD_BACKING_S3_PREFIX:'',
+  backing_fs_directory: (process.env.OPD_BACKING_FS_DIR)?process.env.OPD_BACKING:path.join(__dirname,'data'),
+  backing_s3_bucket: (process.env.OPD_BACKING_S3_BUCKET)?process.env.OPD_BACKING_S3_BUCKET:'',
+  backing_s3_prefix: (process.env.OPD_BACKING_S3_PREFIX)?process.env.OPD_BACKING_S3_PREFIX:'',
+  logging: (process.env.OPD_LOGGING)?process.env.OPD_LOGGING:'fs', // Options are s3 or fs
+  logging_fs_file: (process.env.OPD_LOGGING_FS_FILE)?process.env.OPD_LOGGING_FS_FILE:path.join(__dirname,'changes.log'),
+  logging_s3_bucket: (process.env.OPD_LOGGING_S3_BUCKET)?process.env.OPD_LOGGING_S3_BUCKET:'',
+  logging_s3_prefix: (process.env.OPD_LOGGING_S3_PREFIX)?process.env.OPD_LOGGING_S3_PREFIX:'',
   elasticsearch_host: (process.env.OPD_ES_HOST)?process.env.OPD_ES_HOST:'localhost',
   elasticsearch_port: (process.env.OPD_ES_PORT)?process.env.OPD_ES_PORT:9200
 }

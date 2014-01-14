@@ -11,11 +11,21 @@ module.exports = function(app){
   // Load backing based on setting
   if(app.locals.settings.backing == 's3') {
     var backing = require(__dirname + '/../lib/backing-s3.js')({
-      bucket: app.locals.settings.s3_bucket,
-      prefix: app.locals.settings.s3_prefix
+      bucket: app.locals.settings.backing_s3_bucket,
+      prefix: app.locals.settings.backing_s3_prefix
     });
   } else {
-    var backing = require(__dirname + '/../lib/backing-fs.js')(app.locals.settings.fs_directory);
+    var backing = require(__dirname + '/../lib/backing-fs.js')(app.locals.settings.backing_fs_directory);
+  }
+  
+  // Load logging based on setting
+  if(app.locals.settings.logging == 's3') {
+    var logging = require(__dirname + '/../lib/logging-s3.js')({
+      bucket: app.locals.settings.logging_s3_bucket,
+      prefix: app.locals.settings.logging_s3_prefix
+    });
+  } else {
+    var logging = require(__dirname + '/../lib/logging-fs.js')(app.locals.settings.logging_fs_file);
   }
   
   // Get a place json or geojson file
@@ -44,32 +54,39 @@ module.exports = function(app){
     var id = req.params.id + ((req.params.geo)?'/'+req.params.geo:'');
     var timestamp = Date.now();
     
-    backing.deleteId(id, timestamp, function(error,data) {
+    // Log the change
+    logging.log(id, timestamp, function(error) {
       if(error) {
         res.status(error);
         res.json(apiReturn(false, error));
       } else {
+        backing.deleteId(id, timestamp, function(error,data) {
+          if(error) {
+            res.status(error);
+            res.json(apiReturn(false, error));
+          } else {
       
-        // Remove from elasticsearch if place
-        if(isPlace) {
-          esClient.delete({
-            index: 'places-test',
-            type: 'place',
-            id: id
-          }, function (error, response) {
-            if(error && error.message != 'Not Found') {
-              res.status(500);
-              res.json(apiReturn(false, 500, "Internal Server Error - Elasticsearch failure"));
+            // Remove from elasticsearch if place
+            if(isPlace) {
+              esClient.delete({
+                index: 'places-test',
+                type: 'place',
+                id: id
+              }, function (error, response) {
+                if(error && error.message != 'Not Found') {
+                  res.status(500);
+                  res.json(apiReturn(false, 500, "Internal Server Error - Elasticsearch failure"));
+                } else {
+                  res.json(apiReturn(true));
+                }
+              });
             } else {
               res.json(apiReturn(true));
             }
-          });
-        } else {
-          res.json(apiReturn(true));
-        }
+          }
+        });
       }
     });
-    
   });
   
   // Create or update a place or geojson
@@ -105,32 +122,40 @@ module.exports = function(app){
       }
     }
     
-    // Save object
-    backing.updateId(id, req.body, timestamp, function(error,data) {
+    // Log the change
+    logging.log(id, timestamp, function(error) {
       if(error) {
         res.status(error);
         res.json(apiReturn(false, error));
       } else {
+        // Save object
+        backing.updateId(id, req.body, timestamp, function(error,data) {
+          if(error) {
+            res.status(error);
+            res.json(apiReturn(false, error));
+          } else {
         
-        // Update elasticsearch if isPlace
-        if(isPlace) {
-          esClient.index({
-            index: 'places-test',
-            type: 'place',
-            id: id,
-            body: req.body
-          }, function (error, response) {
-            if(error) {
-              console.log(error);
-              res.status(500);
-              res.json(apiReturn(false, 500, "Internal Server Error - Elasticsearch failure"));
+            // Update elasticsearch if isPlace
+            if(isPlace) {
+              esClient.index({
+                index: 'places-test',
+                type: 'place',
+                id: id,
+                body: req.body
+              }, function (error, response) {
+                if(error) {
+                  console.log(error);
+                  res.status(500);
+                  res.json(apiReturn(false, 500, "Internal Server Error - Elasticsearch failure"));
+                } else {
+                  res.json(apiReturn(true));
+                }
+              });
             } else {
               res.json(apiReturn(true));
             }
-          });
-        } else {
-          res.json(apiReturn(true));
-        }
+          }
+        });
       }
     });
     
