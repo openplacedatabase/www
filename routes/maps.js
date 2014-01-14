@@ -10,7 +10,7 @@ module.exports = function(app){
       css: ['/assets/css/map.css'],
       js: [
         'https://maps.googleapis.com/maps/api/js?sensor=false&key=' + process.env.OPD_GOOGLE_API_KEY,
-        '/assets/vendor/js/geojson-google-maps-from.js',
+        '/assets/vendor/js/geojson-google-maps.js',
         '/assets/vendor/js/uuid.js',
         '/assets/js/map.js'        
       ],
@@ -29,8 +29,7 @@ module.exports = function(app){
       js: [
         'https://maps.googleapis.com/maps/api/js?libraries=drawing&sensor=false&key=' + process.env.OPD_GOOGLE_API_KEY,
         '//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.7.2/mustache.min.js',
-        '/assets/vendor/js/geojson-google-maps-from.js',
-        '/assets/vendor/js/geojson-google-maps-to.js',
+        '/assets/vendor/js/geojson-google-maps.js',
         '/assets/vendor/js/jquery.mustache.js',
         '/assets/js/editor.js'
       ],
