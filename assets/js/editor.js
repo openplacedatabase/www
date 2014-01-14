@@ -13,9 +13,13 @@ var NEW_GEO_CLASS = 'new-geo',
     detailChanges = false,
     shapeChanges = true,
     
+    editingPointsLimit = 100,
+    
     map,
     shapes = [],
     selectedShape,
+    editingLines = [],
+    selectedLine,
     drawingManager,
     
     // Options that control the display of the Google Map
@@ -67,6 +71,23 @@ var NEW_GEO_CLASS = 'new-geo',
       "strokeWeight": 3,
       "fillColor": "#FE8C00",
       "fillOpacity": 0.3
+    },
+    
+    // Editing polygons have no border
+    editingPolygonStyle = {
+      "strokeWeight": 0
+    },
+    
+    // Editing lines are thick
+    editLineStyle = {
+      "strokeColor": "#000000",
+      "strokeWeight": 2
+    },
+    
+    // Hover line style
+    hoverLineStyle = {
+      "strokeColor": "#777777",
+      "strokeWeight": 5
     },
     
     // Options for the Google Maps Drawing Manager
@@ -569,118 +590,96 @@ function deletePlace(){
  */
 function enableEditing(){
   if(selectedShape){
+    
+    editing = true;
   
-    // Make sure the selected shape has no more than 1000 points
-    var numPoints = 0;
-    selectedShape.getPaths().forEach(function(path){
-      numPoints += path.getLength();
-    });
-    if(numPoints > 500){
-      shapeToLines(selectedShape, 500);
-    } else {
-  
-      editing = true;
-      selectedShape.setEditable(true);
+    // Split the shape into multiple lines
+    selectedShape.getPaths().forEach(function(path, pathIndex){
+    
+      // Calculate length of each line
+      var lineLength = Math.ceil(path.getLength() / Math.ceil(path.getLength() / editingPointsLimit)),
+          numChunks = Math.ceil(path.getLength() / lineLength),
+          pathLines = [];
       
-      // Listen for changes to the points
-      selectedShape.getPaths().forEach(function(path, index){
-        google.maps.event.addListener(path, 'insert_at', function(){
-          shapesChanged();
-        });
-        google.maps.event.addListener(path, 'remove_at', function(){
-          shapesChanged();
-        });
-        google.maps.event.addListener(path, 'set_at', function(){
-          shapesChanged();
-        });
-      });
-      
-      // Enable polygon vertexes to be deleted.
-      // Inspired by http://stackoverflow.com/a/14441786/879121
-      selectedShape.addListener('rightclick', function(event){
-        if(event.path != null && event.vertex != null){
-          var path = this.getPaths().getAt(event.path);
-          if(path.getLength() > 3){
-            path.removeAt(event.vertex);
-          } else {
-            this.getPaths().removeAt(event.path);
-          }
-          shapesChanged();
+      // Create new lines
+      for(var i = 0; i < numChunks; i++){
+        var newLinePath = [],
+            start = i * lineLength,
+            end = Math.min((i + 1) * lineLength, path.getLength()-1);
+        for(var j = start; j <= end; j++){
+          newLinePath.push(path.getAt(j));
         }
+        var line = new google.maps.Polyline({ 
+          path: newLinePath, 
+          map: map
+        });
+        line.setOptions(editLineStyle);
+        line.addListener('click', function(){
+          setLineSelection(this);
+        });
+        line.addListener('mouseover', function(){
+          this.setOptions(hoverLineStyle);
+        });
+        line.addListener('mouseout', function(){
+          this.setOptions(editLineStyle);
+        });
+        pathLines.push(line);
+      }
+      
+      // Add first point to last line
+      pathLines[pathLines.length-1].getPath().push(path.getAt(0));
+
+      // Add event listeners after modifying the last line
+      // so that they're not needlessly fired when the
+      // point is added
+      $.each(pathLines, function(i, line){
+        line.getPath().addListener('insert_at', function(){
+          updateShapeFromLines(selectedShape, pathIndex, pathLines);
+        });
+        line.getPath().addListener('remove_at', function(){
+          updateShapeFromLines(selectedShape, pathIndex, pathLines);
+        });
+        line.getPath().addListener('set_at', function(){
+          updateShapeFromLines(selectedShape, pathIndex, pathLines);
+        });
+        // Enable polygon vertexes to be deleted.
+        // Inspired by http://stackoverflow.com/a/14441786/879121
+        line.addListener('rightclick', function(event){
+          if(event.vertex != null){
+            this.getPath().removeAt(event.vertex);
+            shapesChanged();
+          }
+        });
       });
-    }
+      
+      editingLines = editingLines.concat(pathLines);
+    });
+    
+    // Remove the border on original polygon
+    selectedShape.setOptions(editingPolygonStyle);
   }
 };
 
-/**
- * Split a shape into lines of no more than the given 
- * number of points. End points of the lines should overlap
- * to give the appearance of a closed polygon
+/** 
+ * Called whenever lines change; updates the specified
+ * path of the shape based on the lines that were
+ * derived from it
  */
-function shapeToLines(shape, maxPoints){
-  selectedShape.getPaths().forEach(function(path, pathIndex){
-    
-    // Calculate length of each line
-    var lineLength = Math.ceil(path.getLength() / Math.ceil(path.getLength() / maxPoints)),
-        numChunks = Math.ceil(path.getLength() / lineLength),
-        lines = [];
-    
-    // Create new lines
-    for(var i = 0; i < numChunks; i++){
-      var newLinePath = [],
-          start = i * lineLength,
-          end = Math.min((i + 1) * lineLength, path.getLength()-1);
-      for(var j = start; j <= end; j++){
-        newLinePath.push(path.getAt(j));
+function updateShapeFromLines(shape, pathIndex, lines){
+  var newPoints = [];
+  for(var i = 0; i < lines.length; i++){
+    var linePath = lines[i].getPath(),
+        lineLength = linePath.getLength();
+    linePath.forEach(function(point, j){
+      // Don't add the last point of each line
+      // because those are duplicated
+      if(j !== lineLength - 1){
+        newPoints.push(point);
       }
-      var line = new google.maps.Polyline({ 
-        path: newLinePath, 
-        map: map
-      });
-      //line.setOptions(selectedPolygonStyle);
-      line.addListener('click', function(){
-        this.setEditable(true);
-      });
-      lines.push(line);
-    }
-    
-    // Add first point to last line
-    lines[lines.length-1].getPath().push(path.getAt(0));
-
-    // Add event listeners after modifying the last line
-    $.each(lines, function(i, line){
-      line.getPath().addListener('insert_at', function(){
-        updateShape(shape, pathIndex, lines);
-      });
-      line.getPath().addListener('remove_at', function(){
-        updateShape(shape, pathIndex, lines);
-      });
-      line.getPath().addListener('set_at', function(){
-        updateShape(shape, pathIndex, lines);
-      });
     });
-  });
-  
-  /** 
-   * Called whenever lines change; updates the specified
-   * path of the shape based on the lines that were
-   * derived from it
-   */
-  function updateShape(shape, pathIndex, lines){
-    var newPoints = [];
-    for(var i = 0; i < lines.length; i++){
-      var linePath = lines[i].getPath(),
-          lineLength = linePath.getLength();
-      linePath.forEach(function(point, j){
-        // Don't add the last point of each line
-        // because those are duplicated
-        if(j !== lineLength - 1){
-          newPoints.push(point);
-        }
-      });
-    }
-    shape.getPaths().setAt(pathIndex, new google.maps.MVCArray(newPoints));
-  };
+  }
+  shape.getPaths().setAt(pathIndex, new google.maps.MVCArray(newPoints));
+  shapesChanged();
 };
 
 /**
@@ -691,9 +690,8 @@ function setSelection(shape){
     clearSelection();
     selectedShape = shape;
     
-    // Highlight selected shape and make it draggable
+    // Highlight selected shape
     shape.setOptions(selectedPolygonStyle);
-    shape.setDraggable(true);
     
     // Listen for changes to the shape
     selectedShape.addListener('dragend', function(){
@@ -719,9 +717,30 @@ function clearSelection(){
   editing = false;
   if(selectedShape) {
     selectedShape.setEditable(false);
-    selectedShape.setDraggable(false);
     selectedShape.setOptions(basePolygonStyle);
     selectedShape = null;
+  }
+  clearLineSelection();
+  clearLines();
+};
+
+/**
+ * Set the line as selected
+ */
+function setLineSelection(line){
+  clearLineSelection();
+  line.setEditable(true);
+  selectedLine = line;
+};
+
+/**
+ * Remove the selection from the currently
+ * selected line
+ */
+function clearLineSelection(){
+  if(selectedLine){
+    selectedLine.setEditable(false);
+    selectedLine = null;
   }
 };
 
@@ -729,12 +748,20 @@ function clearSelection(){
  * Remove all shapes from the map
  */
 function clearShapes(){
-  if(shapes.length > 0) {
-    $.each(shapes, function(i, shape){
-      shape.setMap(null);
-    });
-    shapes = [];
-  }
+  $.each(shapes, function(i, shape){
+    shape.setMap(null);
+  });
+  shapes = [];
+};
+
+/**
+ * Remove edit lines from the map
+ */
+function clearLines(){
+  $.each(editingLines, function(i, line){
+    line.setMap(null);
+  });
+  editingLines = [];
 };
 
 /**
