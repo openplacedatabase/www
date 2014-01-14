@@ -14,7 +14,8 @@ app.locals.settings = {
   logging_s3_bucket: (process.env.OPD_LOGGING_S3_BUCKET)?process.env.OPD_LOGGING_S3_BUCKET:'',
   logging_s3_prefix: (process.env.OPD_LOGGING_S3_PREFIX)?process.env.OPD_LOGGING_S3_PREFIX:'',
   elasticsearch_host: (process.env.OPD_ES_HOST)?process.env.OPD_ES_HOST:'localhost',
-  elasticsearch_port: (process.env.OPD_ES_PORT)?process.env.OPD_ES_PORT:9200
+  elasticsearch_port: (process.env.OPD_ES_PORT)?process.env.OPD_ES_PORT:9200,
+  elasticsearch_index: (process.env.OPD_ES_INDEX)?process.env.OPD_ES_INDEX:'places'
 }
 
 // Serve up static files in assets directory

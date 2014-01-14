@@ -52,7 +52,7 @@ module.exports = function(app){
     
     
     esClient.search({
-      index: 'places-test',
+      index: app.locals.settings.elasticsearch_index,
       q: query
     }, function (error, response) {
       if(error) {
