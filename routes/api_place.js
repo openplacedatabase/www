@@ -47,8 +47,8 @@ module.exports = function(app){
   });
   
   // Delete a place json or geojson file
-  //app.delete('/api/v0/place/:id/:geo?', restrict, function(req, res) {
-  app.delete('/api/v0/place/:id/:geo?', function(req, res) {
+  app.delete('/api/v0/place/:id/:geo?', restrict, function(req, res) {
+  //app.delete('/api/v0/place/:id/:geo?', function(req, res) {
     
     var isPlace = false;
     if(!req.params.geo) isPlace = true;
@@ -91,8 +91,8 @@ module.exports = function(app){
   });
   
   // Create or update a place or geojson
-  //app.post('/api/v0/place/:id/:geo?', restrict, function(req, res) {
-  app.post('/api/v0/place/:id/:geo?', function(req, res) {
+  app.post('/api/v0/place/:id/:geo?', restrict, function(req, res) {
+  //app.post('/api/v0/place/:id/:geo?', function(req, res) {
     
     var isPlace = false;
     var id = req.params.id + ((req.params.geo)?'/'+req.params.geo:'');

@@ -15,6 +15,7 @@
     "aws-sdk": "2.0.x",
     "elasticsearch": "1.0.x",
     "optimist": "0.6.x",
-    "readdirp": "0.3.3"
+    "readdirp": "0.3.3",
+    "csv": "0.3.6"
   }
 }
