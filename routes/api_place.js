@@ -70,7 +70,7 @@ module.exports = function(app){
             // Remove from elasticsearch if place
             if(isPlace) {
               esClient.delete({
-                index: 'places-test',
+                index: app.locals.settings.elasticsearch_index,
                 type: 'place',
                 id: id
               }, function (error, response) {
@@ -139,7 +139,7 @@ module.exports = function(app){
             // Update elasticsearch if isPlace
             if(isPlace) {
               esClient.index({
-                index: 'places-test',
+                index: app.locals.settings.elasticsearch_index,
                 type: 'place',
                 id: id,
                 body: req.body
