@@ -629,7 +629,7 @@ function enableEditing(){
       // Add first point to last line
       lines[lines.length-1].getPath().push(path.getAt(0));
 
-      // Keep track of whether a point moved event was fired
+      // Keep track of whether a point event was fired
       // by the user or by us updating a neighbor point
       var updatingNeighbor = false;
       
@@ -657,28 +657,9 @@ function enableEditing(){
           // we have to figure out the line's position and neighbors
           // at runtime.
           if((vertex === 0 || vertex === this.getLength() - 1) && !updatingNeighbor){
-            
-            var numLines = lines.length,
-                lineIndex = lines.indexOf(line),
-                neighborLineIndex, neighborPath, neighborPointIndex;
-            
-            // First point of line was moved
-            if(vertex === 0){
-              neighborLineIndex = lineIndex === 0 ? numLines - 1 : lineIndex - 1;
-              neighborPath = lines[neighborLineIndex].getPath();
-              neighborPointIndex = neighborPath.getLength() - 1;
-            }
-            
-            // Last point in line was moved
-            else {
-              neighborLineIndex = lineIndex === numLines - 1 ? 0 : lineIndex + 1;
-              neighborPath = lines[neighborLineIndex].getPath();
-              neighborPointIndex = 0;
-            }
-            
-            // Update the neighboring point
+            var neighbor = findNeighbor(lines, line, vertex);
             updatingNeighbor = true;
-            neighborPath.setAt(neighborPointIndex, this.getAt(vertex));
+            neighbor.path.setAt(neighbor.index, this.getAt(vertex));
           } 
           
           // Update underlying shape with changes only if we're moving
@@ -693,10 +674,30 @@ function enableEditing(){
         // Enable polygon vertexes to be deleted.
         // Inspired by http://stackoverflow.com/a/14441786/879121
         line.addListener('rightclick', function(event){
-          if(event.vertex != null){
+          var vertex = event.vertex;
+          
+          if(vertex != null){
+            
+            // Remove the point
             this.getPath().removeAt(event.vertex);
-            // If there are no more points in this line
-            // then we need to remove it
+            
+            // If the point being removed is the first or last
+            // point in the line then we need to find and move
+            // the neigbor's point to match our new end point.
+            if(vertex === 0 || vertex === this.getPath().getLength()){
+              var neighbor = findNeighbor(lines, this, vertex),
+                  newEndIndex = vertex === 0 ? 0 : this.getPath().getLength() - 1;
+              neighbor.path.setAt(neighbor.index, this.getPath().getAt(newEndIndex));
+            }
+            
+            // If there if only one point left then delete the line.
+            // It's neghbors should both be overlapping the last remaining point.
+            if(this.getPath().getLength() === 1){
+              this.setMap(null);
+              var linePos = lines.indexOf(this);
+              lines.splice(linePos, 1);
+            }            
+            
             shapesChanged();
           }
         });
@@ -708,6 +709,35 @@ function enableEditing(){
     // Remove the border on original polygon
     selectedShape.setOptions(editingPolygonStyle);
   }
+  
+  /**
+   * Finds the neighboring path and point index for
+   * updating a neighbor's matching end point.
+   */
+  function findNeighbor(lines, line, pointIndex){
+    var numLines = lines.length,
+        lineIndex = lines.indexOf(line),
+        neighborLineIndex, neighborPath, neighborPointIndex;
+    
+    // First point in line
+    if(pointIndex === 0){
+      neighborLineIndex = lineIndex === 0 ? numLines - 1 : lineIndex - 1;
+      neighborPath = lines[neighborLineIndex].getPath();
+      neighborPointIndex = neighborPath.getLength() - 1;
+    }
+    
+    // Last point in line
+    else {
+      neighborLineIndex = lineIndex === numLines - 1 ? 0 : lineIndex + 1;
+      neighborPath = lines[neighborLineIndex].getPath();
+      neighborPointIndex = 0;
+    }
+    
+    return {
+      path: neighborPath,
+      index: neighborPointIndex
+    };
+  };
 };
 
 /** 
