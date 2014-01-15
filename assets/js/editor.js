@@ -13,7 +13,7 @@ var NEW_GEO_CLASS = 'new-geo',
     detailChanges = false,
     shapeChanges = true,
     
-    editingPointsLimit = 100,
+    editingPointsLimit = 3,
     
     map,
     shapes = [],
@@ -81,7 +81,7 @@ var NEW_GEO_CLASS = 'new-geo',
     // Editing lines are thick
     editLineStyle = {
       "strokeColor": "#000000",
-      "strokeWeight": 2
+      "strokeWeight": 5
     },
     
     // Hover line style
@@ -599,7 +599,7 @@ function enableEditing(){
       // Calculate length of each line
       var lineLength = Math.ceil(path.getLength() / Math.ceil(path.getLength() / editingPointsLimit)),
           numChunks = Math.ceil(path.getLength() / lineLength),
-          pathLines = [];
+          lines = [];
       
       // Create new lines
       for(var i = 0; i < numChunks; i++){
@@ -623,36 +623,86 @@ function enableEditing(){
         line.addListener('mouseout', function(){
           this.setOptions(editLineStyle);
         });
-        pathLines.push(line);
+        lines.push(line);
       }
       
       // Add first point to last line
-      pathLines[pathLines.length-1].getPath().push(path.getAt(0));
+      lines[lines.length-1].getPath().push(path.getAt(0));
 
+      // Keep track of whether a point moved event was fired
+      // by the user or by us updating a neighbor point
+      var updatingNeighbor = false;
+      
       // Add event listeners after modifying the last line
       // so that they're not needlessly fired when the
       // point is added
-      $.each(pathLines, function(i, line){
+      $.each(lines, function(i, line){
+        
+        // New point
         line.getPath().addListener('insert_at', function(){
-          updateShapeFromLines(selectedShape, pathIndex, pathLines);
+          updateShapeFromLines(selectedShape, pathIndex, lines);
         });
+        
+        // Point removed
         line.getPath().addListener('remove_at', function(){
-          updateShapeFromLines(selectedShape, pathIndex, pathLines);
+          updateShapeFromLines(selectedShape, pathIndex, lines);
         });
-        line.getPath().addListener('set_at', function(){
-          updateShapeFromLines(selectedShape, pathIndex, pathLines);
+        
+        // Point moved
+        line.getPath().addListener('set_at', function(vertex){
+          
+          // When either the first or last point was moved we need
+          // to move the matching point of the neighboring line.
+          // Because lines may be deleted (unlikely, but possible)
+          // we have to figure out the line's position and neighbors
+          // at runtime.
+          if((vertex === 0 || vertex === this.getLength() - 1) && !updatingNeighbor){
+            
+            var numLines = lines.length,
+                lineIndex = lines.indexOf(line),
+                neighborLineIndex, neighborPath, neighborPointIndex;
+            
+            // First point of line was moved
+            if(vertex === 0){
+              neighborLineIndex = lineIndex === 0 ? numLines - 1 : lineIndex - 1;
+              neighborPath = lines[neighborLineIndex].getPath();
+              neighborPointIndex = neighborPath.getLength() - 1;
+            }
+            
+            // Last point in line was moved
+            else {
+              neighborLineIndex = lineIndex === numLines - 1 ? 0 : lineIndex + 1;
+              neighborPath = lines[neighborLineIndex].getPath();
+              neighborPointIndex = 0;
+            }
+            
+            // Update the neighboring point
+            updatingNeighbor = true;
+            neighborPath.setAt(neighborPointIndex, this.getAt(vertex));
+          } 
+          
+          // Update underlying shape with changes only if we're moving
+          // a point in the middle of the line or we're updating a neighbor
+          // point after the user moved a first/last point
+          else {
+            updatingNeighbor = false;
+            updateShapeFromLines(selectedShape, pathIndex, lines);
+          }
         });
+        
         // Enable polygon vertexes to be deleted.
         // Inspired by http://stackoverflow.com/a/14441786/879121
         line.addListener('rightclick', function(event){
           if(event.vertex != null){
             this.getPath().removeAt(event.vertex);
+            // If there are no more points in this line
+            // then we need to remove it
             shapesChanged();
           }
         });
       });
       
-      editingLines = editingLines.concat(pathLines);
+      editingLines = editingLines.concat(lines);
     });
     
     // Remove the border on original polygon
