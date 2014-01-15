@@ -66,27 +66,29 @@ var NEW_GEO_CLASS = 'new-geo',
     
     // Selected polygons are orange
     selectedPolygonStyle = {
-      "strokeColor": "#FE8C00",
+      "strokeColor": "#428bca",
       "strokeOpacity": 1,
       "strokeWeight": 3,
-      "fillColor": "#FE8C00",
+      "fillColor": "#9999ff",
       "fillOpacity": 0.3
     },
     
     // Editing polygons have no border
     editingPolygonStyle = {
-      "strokeWeight": 0
+      "strokeWeight": 0,
+      "fillColor": "#FE8C00",
+      "fillOpacity": 0.3
     },
     
     // Editing lines are thick
     editLineStyle = {
-      "strokeColor": "#000000",
+      "strokeColor": "#FE8C00",
       "strokeWeight": 5
     },
     
     // Hover line style
     hoverLineStyle = {
-      "strokeColor": "#777777",
+      "strokeColor": "#FFC073",
       "strokeWeight": 5
     },
     
@@ -671,8 +673,8 @@ function enableEditing(){
           }
         });
         
-        // Enable polygon vertexes to be deleted.
-        // Inspired by http://stackoverflow.com/a/14441786/879121
+        // Deleting a point
+        // http://stackoverflow.com/a/14441786
         line.addListener('rightclick', function(event){
           var vertex = event.vertex;
           
