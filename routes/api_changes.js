@@ -24,8 +24,8 @@ module.exports = function(app){
     
     logging.get_changes(from, to, function(error, data) {
       if(error) {
-        res.status(error);
-        res.json(api.format_return(false, error));
+        res.status(error.code);
+        res.json(api.format_return(false, error.code, error.msgs));
       } else {
         res.json(api.format_return(data));
       }
