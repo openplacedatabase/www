@@ -145,6 +145,7 @@ module.exports = function(app){
 
     validatePlace(id, req.body, function(error) {
       if(error) {
+        console.log(error);
         res.status = error.status.code;
         res.json(api.format_return(error.data, error.status.code, error.status.msgs));
       } else {

@@ -1,16 +1,20 @@
 {
   "name": "openplacedatabase",
+  "repository":{
+    "type" : "git",
+    "url" : "git@github.com:openplacedatabase/www.git"
+  },
   "version": "0.0.1",
   "dependencies": {
     "ejs": "0.8.4",
-    "express": "3.4.0",
-    "superagent": "0.15.4",
+    "express": "3.4.8",
+    "superagent": "0.16.x",
     "openid": "0.5.5",
     "underscore": "1.5.x",
     "async": "0.2.9",
     "geojson-assert":"0.0.x",
     "mkdirp":"0.3.x",
-    "validator":"2.0.x",
+    "validator":"3.1.x",
     "aws-sdk": "2.0.x",
     "elasticsearch": "1.0.x",
     "optimist": "0.6.x",
