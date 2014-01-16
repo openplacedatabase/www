@@ -84,7 +84,7 @@ $(document).ready(function(){
       var placeId = uuid.v4();
       
       // Save empty place object
-      $.ajax('/api/v0/place/' + placeId, {
+      $.ajax('/api/v0/places/' + placeId, {
         contentType: 'application/json',
         data: JSON.stringify({
           id: placeId,
@@ -297,7 +297,7 @@ function updateSelection(placeId, geoId){
 function getGeoJSON(placeId, geoId){
   
   // Get the new shape
-  $.get('/api/v0/place/' + placeId + '/' + geoId).done(function(result){
+  $.get('/api/v0/places/' + placeId + '/' + geoId).done(function(result){
     
     // Convert the geojson to a google maps object
     var newShapes = google.maps.geojson.from(result.data, googleShapeOptions);

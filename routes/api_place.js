@@ -31,7 +31,7 @@ module.exports = function(app){
   }
   
   // Get a place json or geojson file
-  app.get(/\/api\/v0\/place\/(.*)+/, function(req, res) {
+  app.get(/\/api\/v0\/places\/(.*)+/, function(req, res) {
     
     var ids = req.params[0].split(',');
 
@@ -70,8 +70,7 @@ module.exports = function(app){
   });
   
   // Delete a place json or geojson file
-  app.delete(/\/api\/v0\/place\/(.*)+/, restrict, function(req, res) {
-  //app.delete('/api/v0/place/:id/:geo?', function(req, res) {
+  app.delete(/\/api\/v0\/places\/(.*)+/, restrict, function(req, res) {
 
     var ids = req.params[0].split(',');
     var timestamp = Date.now();
@@ -134,8 +133,7 @@ module.exports = function(app){
   }
 
   // Create or update a place or geojson
-  app.post('/api/v0/place/:id/:geo?', restrict, function(req, res) {
-  //app.post('/api/v0/place/:id/:geo?', function(req, res) {
+  app.post('/api/v0/places/:id/:geo?', restrict, function(req, res) {
     
     var id = req.params.id + ((req.params.geo)?'/'+req.params.geo:'');
     var timestamp = Date.now();
@@ -163,8 +161,7 @@ module.exports = function(app){
   });
 
   // Create or update multiple places or geojsons
-  app.post('/api/v0/place/', restrict, function(req, res) {
-  //app.post('/api/v0/place/:id/:geo?', function(req, res) {
+  app.post('/api/v0/places/', restrict, function(req, res) {
     
     if(!_.isObject(req.body)) {
       res.status = 400;

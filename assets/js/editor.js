@@ -190,7 +190,7 @@ function initialize(){
  */
 function getPlace(placeId){
 
-  $.get('/api/v0/place/' + placeId).done(function(result){
+  $.get('/api/v0/places/' + placeId).done(function(result){
     
     var place = result.data;
     
@@ -260,7 +260,7 @@ function getPlace(placeId){
     // Download geojson button
     placeContainer.on('click', '.download-geojson-button', function(){
       var geoId = $(this).closest('.geo-list-item').data('geo-id');
-      window.open('/api/v0/place/' + placeId + '/' + geoId, '_blank');
+      window.open('/api/v0/places/' + placeId + '/' + geoId, '_blank');
     });
     
     // Upload geojson button
@@ -322,7 +322,7 @@ function selectBoundary(placeId, geoId, newGeo){
 function getGeoJSON(placeId, geoId){
   
   // Get the new shape
-  $.get('/api/v0/place/' + placeId + '/' + geoId).done(function(result){
+  $.get('/api/v0/places/' + placeId + '/' + geoId).done(function(result){
     
     // Convert the geojson to a google maps object
     var newShapes = google.maps.geojson.from(result.data, basePolygonStyle);
@@ -492,7 +492,7 @@ function savePlaceDetails(){
   console.log(postData);
   
   // Ajax POST
-  $.ajax('/api/v0/place/' + placeId, {
+  $.ajax('/api/v0/places/' + placeId, {
     contentType: 'application/json',
     data: JSON.stringify(postData),
     type: 'POST'
@@ -533,7 +533,7 @@ function saveShapes(){
  * Save geojson
  */
 function saveGeojson(geoId, geojson){
-  return $.ajax('/api/v0/place/' + placeId + '/' + geoId, {
+  return $.ajax('/api/v0/places/' + placeId + '/' + geoId, {
     contentType: 'application/json',
     data: JSON.stringify(geojson),
     type: 'POST'
@@ -578,7 +578,7 @@ function detailsSaved(){
  */
 function deletePlace(){
   $.ajax({
-    url: '/api/v0/place/' + placeId,
+    url: '/api/v0/places/' + placeId,
     type: 'DELETE'
   }).done(function(){
     window.location = '/map';
