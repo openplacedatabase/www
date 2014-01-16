@@ -142,7 +142,7 @@ module.exports = function(app){
 
     if(isPlace(id)) {
       req.body.last_edited_time = timestamp;
-      req.body.last_edited_by = 'User 0';
+      req.body.last_edited_by = app.locals.settings.creds[req.user].id + ' - ' +app.locals.settings.creds[req.user].name;
     }
 
     validatePlace(id, req.body, function(error) {
@@ -184,7 +184,7 @@ module.exports = function(app){
       
       if(isPlace(place.id)) {
         place.json.last_edited_time = timestamp;
-        place.json.last_edited_by = 'User 0';
+        place.json.last_edited_by = app.locals.settings.creds[req.user].id + ' - ' +app.locals.settings.creds[req.user].name;
       }
 
       validatePlace(place.id, place.json, function(error) {

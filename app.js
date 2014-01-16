@@ -15,7 +15,15 @@ app.locals.settings = {
   logging_s3_prefix: (process.env.OPD_LOGGING_S3_PREFIX)?process.env.OPD_LOGGING_S3_PREFIX:'',
   elasticsearch_host: (process.env.OPD_ES_HOST)?process.env.OPD_ES_HOST:'localhost',
   elasticsearch_port: (process.env.OPD_ES_PORT)?process.env.OPD_ES_PORT:9200,
-  elasticsearch_index: (process.env.OPD_ES_INDEX)?process.env.OPD_ES_INDEX:'places'
+  elasticsearch_index: (process.env.OPD_ES_INDEX)?process.env.OPD_ES_INDEX:'places',
+  credentials_file: (process.env.OPD_CRED_FILE)?process.env.OPD_CRED_FILE:path.join(__dirname,'.credentials.json')
+}
+
+// Load credentials file
+if(fs.existsSync(app.locals.settings.credentials_file)) {
+  app.locals.settings.creds = JSON.parse(fs.readFileSync(app.locals.settings.credentials_file));
+} else {
+  app.locals.settings.creds = {};
 }
 
 // Serve up static files in assets directory
