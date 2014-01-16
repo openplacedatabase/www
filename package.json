@@ -20,6 +20,7 @@
     "optimist": "0.6.x",
     "readdirp": "0.3.3",
     "csv": "0.3.6",
-    "adm-zip": "0.4.3"
+    "adm-zip": "0.4.3",
+    "opd-sdk": "git+ssh://git@github.com:openplacedatabase/opd-js-sdk.git"
   }
 }
