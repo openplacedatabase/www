@@ -145,14 +145,14 @@ module.exports = function(app){
 
     validatePlace(id, req.body, function(error) {
       if(error) {
-        console.log(error);
-        res.status = error.status.code;
-        res.json(api.format_return(error.data, error.status.code, error.status.msgs));
+        //console.log(error);
+        res.status = error.code;
+        res.json(api.format_return(error.data, error.code, error.msgs));
       } else {
         updatePlace(id, timestamp, req.body, function(error) {
           if(error) {
-            res.status = error.status.code;
-            res.json(api.format_return(error.data, error.status.code, error.status.msgs));
+            res.status = error.code;
+            res.json(api.format_return(error.data, error.code, error.msgs));
           } else {
             res.json(api.format_return(true));
           }
@@ -162,7 +162,7 @@ module.exports = function(app){
   });
 
   // Create or update multiple places or geojsons
-  app.post('/api/v0/places/', restrict, function(req, res) {
+  app.post('/api/v0/places', restrict, function(req, res) {
     
     if(!_.isObject(req.body)) {
       res.status = 400;

@@ -95,13 +95,13 @@ Response `400`
 
 
 
-##POST /api/v0/places/
+##POST /api/v0/places
 Create or update multiple places and/or geojsons simultaneously.
 
 ###Examples
 
 **Add a new place and its geojsons**
-POST /api/v0/places/
+POST /api/v0/places
 > Content-Type: application/json
 > [Body](api_examples/multipost-place-200-request.json)
 
@@ -109,7 +109,7 @@ Response `200`
 > [JSON](api_examples/multipost-place-200-response.json)
 
 **Add a new place, but the geojson in is bad**
-POST /api/v0/places/
+POST /api/v0/places
 > Content-Type: application/json
 > [Body](api_examples/multipost-place-400-request.json)
 
