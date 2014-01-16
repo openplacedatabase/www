@@ -53,7 +53,9 @@ module.exports = function(app){
     
     esClient.search({
       index: app.locals.settings.elasticsearch_index,
-      q: query
+      q: query,
+      size: req.query.count,
+      from: req.query.offset
     }, function (error, response) {
       if(error) {
         console.log(error);
