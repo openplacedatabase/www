@@ -1,15 +1,15 @@
 # Open Place Database
 
-An effort to provide historical boundary shapes for places worldwide in an easily consumable format.
+An effort to provide historical boundary shapes for places worldwide in an easily consumable format. Browse it [here](http://www.openplacedatabase.com/map).
 
 [![Dependency Status](https://david-dm.org/openplacedatabase/www.png)](https://david-dm.org/openplacedatabase/www)
-## License
 
-Apache 2
+##API
+The documentation is [here](https://github.com/openplacedatabase/www/blob/master/API.md).
+The javascript sdk is available [here](https://github.com/openplacedatabase/opd-js-sdk).
 
-## Use
-
-TODO
+##Schema
+The actual schema for the data is documented [here](https://github.com/openplacedatabase/www/blob/master/SCHEMA.md).
 
 ## Installation
 
@@ -43,3 +43,8 @@ OPD_GOOGLE_API_KEY="<Your google maps key>"
 1. Run the Open Place Database by typing `node <root_dir>/app.js`. It will bind to port 8080 by default.
 
 1. Import the latest snapshot by running `node <root_dir>/utils/initialize.js <path_to_downloaded_zip>.zip`
+
+
+## License
+
+Apache 2
