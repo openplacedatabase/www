@@ -1,10 +1,10 @@
 {
   "name": "openplacedatabase",
+  "version": "0.1.0",
   "repository":{
     "type" : "git",
     "url" : "git@github.com:openplacedatabase/www.git"
   },
-  "version": "0.0.1",
   "dependencies": {
     "ejs": "0.8.x",
     "express": "3.4.8",
