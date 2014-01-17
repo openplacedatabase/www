@@ -40,11 +40,22 @@ OPD_GOOGLE_API_KEY="<Your google maps key>"
 // TODO document the rest of the env vars. For now look in app.js
 ````
 
+1. Add a credentials file called `<root_dir>/.credentials.json` that has your username and password in it.
+````
+{
+  "<your username>": {
+        "pwd":"<a password you don't use anywhere elase>",
+        "id":"1",
+        "name":"Your full name as it will appear in any edits you make"
+  }
+}
+````
+
 1. run `npm install` while in `<root_dir>`
 
 1. Run the Open Place Database by typing `node <root_dir>/app.js`. It will bind to port 8080 by default.
 
-1. Import the latest snapshot by running `node <root_dir>/utils/import.js <path_to_downloaded_zip>.zip`. Note that by default this will populate the `<root_dir>/data` directory, which can swamp your machine if not careful. To back on S3 make sure to set your environment variables correctly
+1. Import the latest snapshot by running `node <root_dir>/utils/import.js <path_to_downloaded_zip>.zip -u username -p password`. Note that by default this will populate the `<root_dir>/data` directory, which can swamp your machine if not careful. To back on S3 make sure to set your environment variables correctly
 
 
 ## License
