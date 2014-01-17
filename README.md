@@ -28,7 +28,7 @@ sudo service elasticsearch restart
 1. Clone this repository. The root of the cloned repo be referred to as `<root_dir>` for the rest of these instructions.
 ````bash
 cd <somewhere>
-git clone git@github.com:openplacedatabase/www.git
+git clone https://github.com/openplacedatabase/www.git
 ````
 
 1. [Download](http://www.openplacedatabase.org/download) the latest data snapshot.
