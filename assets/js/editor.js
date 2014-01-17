@@ -13,7 +13,7 @@ var NEW_GEO_CLASS = 'new-geo',
     detailChanges = false,
     shapeChanges = true,
     
-    editingPointsLimit = 3,
+    editingPointsLimit = 100,
     
     map,
     shapes = [],
