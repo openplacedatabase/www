@@ -53,7 +53,7 @@ var queue = async.queue(function (task, taskCallback) {
         //console.log(error);
         //console.log(data);
         totalProcessed += task.length;
-        if(totalProcessed % 10 == 0) {
+        if(totalProcessed % 100 == 0) {
           console.log('Processed '+totalProcessed);
         }
 
@@ -62,7 +62,7 @@ var queue = async.queue(function (task, taskCallback) {
     }
   });
 
-}, 2);
+}, 10);
 
 // assign a callback
 queue.drain = function() {
