@@ -39,8 +39,8 @@ var queue = async.queue(function (task, taskCallback) {
     if(error) taskCallback(error);
     //console.log(requestObject);
     opdClient.savePlaces(requestObject, function(error, data) {
-      console.log(error);
-      console.log(data);
+      //console.log(error);
+      //console.log(data);
       taskCallback(error);
     });
   });
@@ -78,7 +78,6 @@ for(var x in zipEntries) {
       if(error) console.log(error);
     });
     batch = [];
-    break;
   }
 }
 
