@@ -40,8 +40,8 @@ app.use(express.cookieParser());
 app.use(require(__dirname + '/lib/options.js'));
 
 // Make the request body available as text instead of a stream
-app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({limit: '50mb'}));
 
 /**
  * Routes

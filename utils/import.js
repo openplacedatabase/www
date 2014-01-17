@@ -9,11 +9,13 @@ var fs = require('fs'),
       .default('c',10)
       .argv;
 
+/*
 var opdClient = opdSDK.createClient({
     host: 'http://localhost:8080',
     username:argv.u,
     password:argv.p
   });
+*/
 
 if(argv._.length !== 1) {
   console.log('Usage: node utils/import.js from-file.zip');
@@ -26,6 +28,8 @@ if(sourceFile.substr(0,1) != '/') {
   var sourceFile = path.join(process.cwd(),sourceFile);
 }
 
+var totalProcessed = 0;
+
 var queue = async.queue(function (task, taskCallback) {
   //console.log(task.length);
   
@@ -36,13 +40,26 @@ var queue = async.queue(function (task, taskCallback) {
       callback(null);
     });
   },function(error) {
-    if(error) taskCallback(error);
-    //console.log(requestObject);
-    opdClient.savePlaces(requestObject, function(error, data) {
-      //console.log(error);
-      //console.log(data);
+    if(error) {
+      console.log('cannot get object from zip',error);
       taskCallback(error);
-    });
+    } else {
+      var opdClient = opdSDK.createClient({
+        host: 'http://localhost:8080',
+        username:argv.u,
+        password:argv.p
+      });
+      opdClient.savePlaces(requestObject, function(error, data) {
+        //console.log(error);
+        //console.log(data);
+        totalProcessed += task.length;
+        if(totalProcessed % 10 == 0) {
+          console.log('Processed '+totalProcessed);
+        }
+
+        taskCallback(error);
+      });
+    }
   });
 
 }, 2);
@@ -56,6 +73,7 @@ var zip = new admZip(sourceFile);
 var zipEntries = zip.getEntries(); // an array of ZipEntry records
 
 var batch = [];
+var batchSize = 0;
 for(var x in zipEntries) {
   var entry = zipEntries[x];
   if(entry.isDirectory) continue;
@@ -67,18 +85,21 @@ for(var x in zipEntries) {
   
   // Extract the ID
   entry.opdId = pathSegments[0]+pathSegments[1]+pathSegments[2];
-  if(extArr[1] == 'geojson') continue;//entry.opdId += '/'+pathSegments[3];
-  
+  if(extArr[1] == 'geojson') entry.opdId += '/'+pathSegments[3];
 
-  batch.push(entry);
 
-  if(batch.length >= 10) {
+  // don't send more than 40 MB of data
+  if(batch.length > 0 && (batch.length >= 10 || (batchSize + entry.header.size)  >= 41943040) ) {
     // Wrapping batch in an array before en-queuing makes async treat it as 1 task
     queue.push([batch],function(error) {
       if(error) console.log(error);
     });
     batch = [];
+    batchSize = 0;
   }
+  
+  batchSize += entry.header.size;
+  batch.push(entry);
 }
 
 // Enqueue anything left
