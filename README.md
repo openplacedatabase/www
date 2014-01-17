@@ -41,12 +41,12 @@ OPD_GOOGLE_API_KEY="<Your google maps key>"
 ````
 
 1. Add a credentials file called `<root_dir>/.credentials.json` that has your username and password in it.
-````
+````json
 {
   "<your username>": {
-        "pwd":"<a password you don't use anywhere elase>",
-        "id":"1",
-        "name":"Your full name as it will appear in any edits you make"
+    "pwd":"<a password you don't use anywhere else>",
+    "id":"1",
+    "name":"Your full name as it will appear in any edits you make"
   }
 }
 ````
