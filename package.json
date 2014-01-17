@@ -21,6 +21,8 @@
     "readdirp": "0.3.3",
     "csv": "0.3.6",
     "adm-zip": "0.4.3",
-    "opd-sdk": "0.1.0"
+    "opd-sdk": "0.1.0",
+    "archiver": "0.5.1",
+    "knox-copy": "0.2.2"
   }
 }
