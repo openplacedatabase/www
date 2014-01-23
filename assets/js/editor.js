@@ -340,17 +340,40 @@ function getGeoJSON(placeId, geoId){
       shapes = newShapes;
       
       // Add the shapes to the map. 
-      // Move and zoom to fit the shape.
+      // Move and zoom to fit the shapes.
       // Add event listeners for selecting shapes.
-      var bounds = new google.maps.LatLngBounds();
+      var bounds = new google.maps.LatLngBounds(),
+          polygons = false;
       $.each(newShapes, function(i, shape){
         shape.setMap(map);
-        bounds.union(shape.getBounds());
-        google.maps.event.addListener(shape, 'click', function() {
-          setSelection(shape);
-        });
+        
+        // Polygons
+        if(shape instanceof google.maps.Polygon){
+          bounds.union(shape.getBounds());
+          google.maps.event.addListener(shape, 'click', function() {
+            setSelection(shape);
+          });
+          polygons = true;
+        } 
+        
+        // Markers
+        else if(shape instanceof google.maps.Marker){
+          bounds.extend(shape.getPosition());
+        }        
       });
+      
       map.fitBounds(bounds);
+      
+      // When we only have points on the map,
+      // the map migh zoom in too far, so fix it.
+      if(!polygons){
+        setTimeout(function(){
+          var zoom = map.getZoom();
+          if(zoom > 10){
+            map.setZoom(10);
+          }
+        }, 500);
+      }
 
       enableDrawingModeButtons();
     }
@@ -488,8 +511,6 @@ function savePlaceDetails(){
   sidebar.find('.place-source-input').each(function(){
     postData.sources.push($.trim($(this).val()));
   });
-  
-  console.log(postData);
   
   // Ajax POST
   $.ajax('/api/v0/places/' + placeId, {
