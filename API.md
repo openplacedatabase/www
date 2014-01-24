@@ -518,61 +518,189 @@ Delete a place and/or geojson
 ###Examples
 
 **Delete a place**
-POST /api/v0/places/61cc4c9f-0dd6-4dcd-8f5e-e8f52f28d3ae
-> Content-Type: application/json
 
-Response `200`
-> [JSON](api_examples/delete-place-200.json)
+````
+DELETE /api/v0/places/61cc4c9f-0dd6-4dcd-8f5e-e8f52f28d3ae
+````
+
+````
+200 OK
+
+{
+  "status": {
+    "code": 200,
+    "msgs": []
+  },
+  "data": true
+}
+````
 
 **Delete a place, but for some reason it failed**
-POST /api/v0/places/
-> Content-Type: application/json
 
-Response `400`
-> [JSON](api_examples/delete-place-400.json)
+````
+DELETE /api/v0/places/61cc4c9f-0dd6-4dcd-8f5e-e8f52f28d3ae
+````
 
+````
+500 Internal Server Error
+
+{
+  "status": {
+    "code": 500,
+    "msgs": ["Unhelpful error message"]
+  },
+  "data": false
+}
+````
 
 
 ##DELETE /api/v0/places/{id1, id2}
+
 Delete multiple places and/or geojsons simultaneously.
 
 ###Examples
 
 **Delete a place and its geojson**
-POST /api/v0/places/61cc4c9f-0dd6-4dcd-8f5e-e8f52f28d3ae,61cc4c9f-0dd6-4dcd-8f5e-e8f52f28d3ae/1
-> Content-Type: application/json
 
-Response `200`
-> [JSON](api_examples/multidelete-place-200.json)
+````
+DELETE /api/v0/places/61cc4c9f-0dd6-4dcd-8f5e-e8f52f28d3ae,61cc4c9f-0dd6-4dcd-8f5e-e8f52f28d3ae/1
+````
+
+````
+200 OK
+
+{
+  "61cc4c9f-0dd6-4dcd-8f5e-e8f52f28d3ae": {
+    "status": {
+      "code": 200,
+      "msgs": []
+    },
+    "data": true
+  },
+  "61cc4c9f-0dd6-4dcd-8f5e-e8f52f28d3ae/1": {
+    "status": {
+      "code": 200,
+      "msgs": []
+    },
+    "data": true
+  }
+}
+````
 
 **Delete a place and its geojson, but the place failed to delete**
-POST /api/v0/places/61cc4c9f-0dd6-4dcd-8f5e-e8f52f28d3ae,61cc4c9f-0dd6-4dcd-8f5e-e8f52f28d3ae/1
-> Content-Type: application/json
 
-Response `200`
-> [JSON](api_examples/multidelete-place-400.json)
+````
+DELETE /api/v0/places/61cc4c9f-0dd6-4dcd-8f5e-e8f52f28d3ae,61cc4c9f-0dd6-4dcd-8f5e-e8f52f28d3ae/1
+````
+
+````
+200 OK
+
+{
+  "61cc4c9f-0dd6-4dcd-8f5e-e8f52f28d3ae": {
+    "status": {
+      "code": 500,
+      "msgs": ["Another unhelpful error message"]
+    },
+    "data": false
+  },
+  "61cc4c9f-0dd6-4dcd-8f5e-e8f52f28d3ae/1": {
+    "status": {
+      "code": 200,
+      "msgs": []
+    },
+    "data": true
+  }
+}
+````
 
 
 ##GET /api/changes?{from,to}
+
 Get a list of all places and their geojsons that have changed
 
 ###Parameters
+
 * `from` - A timestamp to get changes from (*Default* null). If not set changes from the beginning of time will be returned. Please don't do that.
 * `to` - A timestamp to get changes until (*Default* null). If not set will return as many changes as it can.
 
 ###Examples
 
-**Get Changes from 1389898363**
-Get /api/v0/changes?from=1389898363
-> Content-Type: application/json
+**Get Changes from 1389710140336**
 
-Response `200`
-> [JSON](api_examples/get-changes-from.json)
+````
+GET /api/v0/changes?from=1389710140336
+Accept: application/json
+````
 
-**Get the GeoJSON for Derbyshire**
-Get /api/v0/changes?from=1389898363&to=1389899999
-> Content-Type: application/json
+````
+200 OK
 
-Response `200`
-> [JSON](api_examples/get-changes-from-to.json)
+{
+  "status": {
+    "code": 200,
+    "msgs": []
+  },
+  "data": [
+    {
+      "timestamp": 1389710140336,
+      "id": "790af1cb-7e45-4235-aac0-fabf0233edb9"
+    },
+    {
+      "timestamp": 1389710167169,
+      "id": "790af1cb-7e45-4235-aac0-fabf0233edb9"
+    },
+    {
+      "timestamp": 1389724469377,
+      "id": "790af1cb-7e45-4235-aac0-fabf0233edb9"
+    },
+    {
+      "timestamp": 1389724585771,
+      "id": "790af1cb-7e45-4235-aac0-fabf0233edb9"
+    },
+    {
+      "timestamp": 1389724624560,
+      "id": "790af1cb-7e45-4235-aac0-fabf0233edb9"
+    },
+    {
+      "timestamp": 1389724640538,
+      "id": "790af1cb-7e45-4235-aac0-fabf0233edb9"
+    }
+  ]
+}
+````
 
+**Get Changes from 1389710140336 to 1389724585771**
+
+````
+GET /api/v0/changes?from=1389898363&to=1389724585771
+Accept: application/json
+````
+
+````
+200 OK
+
+{
+  "status": {
+    "code": 200,
+    "msgs": []
+  },
+  "data": [
+    {
+      "timestamp": 1389710140336,
+      "id": "790af1cb-7e45-4235-aac0-fabf0233edb9"
+    },
+    {
+      "timestamp": 1389710167169,
+      "id": "790af1cb-7e45-4235-aac0-fabf0233edb9"
+    },
+    {
+      "timestamp": 1389724469377,
+      "id": "790af1cb-7e45-4235-aac0-fabf0233edb9"
+    },
+    {
+      "timestamp": 1389724585771,
+      "id": "790af1cb-7e45-4235-aac0-fabf0233edb9"
+    }
+  ]
+}
