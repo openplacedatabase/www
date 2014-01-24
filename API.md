@@ -1,6 +1,13 @@
-#API documentation
+#API Documentation
 
-
+* [Search for places](#get-apiv0searchplacesq-s-count-offset) - `GET /api/v0/search/places`
+* [Get a place or a geojson](#get-apiv0placesid) - `GET /api/v0/places/{id}`
+* [Get multiple places and/or geojsons](#get-apiv0placesid1id2) - `GET /api/v0/places/{id1,id2,...}`
+* [Create or update a place or geojson](#post-apiv0placesid) - `POST /api/v0/places/{id}`
+* [Create or update multiple places and/or geojsons](#post-apiv0places) - `POST /api/v0/places`
+* [Delete a place and/or geojson](#delete-apiv0placesid) - `DELETE /api/v0/places/{id}`
+* [Delete multiple places and/or geojsons](#delete-apiv0placesid1-id2) - `DELETE /api/v0/places/{id1, id2}`
+* [Get changes](#get-apichangesfromto) - `GET /api/changes?{from,to}`
 
 ##GET /api/v0/search/places?{q, s, count, offset}
 
