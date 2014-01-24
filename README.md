@@ -25,7 +25,7 @@ sudo ./bin/plugin -install mobz/elasticsearch-head
 sudo service elasticsearch restart
 ````
 
-1. Clone this repository. The root of the cloned repo be referred to as `<root_dir>` for the rest of these instructions.
+1. Clone this repository. The root of the cloned repo will be referred to as `<root_dir>` for the rest of these instructions.
 ````bash
 cd <somewhere>
 git clone https://github.com/openplacedatabase/www.git
@@ -55,7 +55,9 @@ OPD_GOOGLE_API_KEY="<Your google maps key>"
 
 1. Run the Open Place Database by typing `node <root_dir>/app.js`. It will bind to port 8080 by default.
 
-1. Import the latest snapshot by running `node <root_dir>/utils/import.js <path_to_downloaded_zip>.zip -u username -p password`. Note that by default this will populate the `<root_dir>/data` directory, which can swamp your machine if not careful. To back on S3 make sure to set your environment variables correctly
+1. Import the latest snapshot by running `node <root_dir>/utils/import.js <path_to_downloaded_zip>.zip -u username -p password`. Note that by default this will populate the `<root_dir>/data` directory, which can swamp your machine if not careful. To use S3 instead make sure to set your environment variables correctly.
+
+Note that if you do not load data you need to create the index using `curl -XPUT 'localhost:9200/places/' -d '{}'`
 
 
 ## License
