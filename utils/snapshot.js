@@ -10,8 +10,13 @@ var archiver = require('archiver'),
     doneStreamingKeys = false,
     processed = 0;
 
+if(argv._.length !== 1) {
+  console.log('Usage: node utils/snapshot.js snapshot.zip');
+  process.exit();
+}
+
 // Setup file stream
-var outputStream = fs.createWriteStream('/tmp/tmp.zip');
+var outputStream = fs.createWriteStream(argv._[0]);
 outputStream.on('close', function() {
   console.log('archiver has been finalized and the output file descriptor has closed.');
 });
@@ -22,7 +27,7 @@ archive.pipe(outputStream);
 
 // Setup Async queue to get S3 objects
 var queue = async.queue(function (key, callback) {
-	s3.getObject({
+  s3.getObject({
     Bucket: argv.b,
     Key: key
   }, function(error, data){
@@ -56,7 +61,12 @@ knox.createClient({
   secret: process.env.AWS_SECRET_ACCESS_KEY,
   bucket: argv.b
 }).streamKeys().on('data', function(key){
-	queue.push(key);
+  
+  // Ignore keys that do not end with geojson or json
+  var keyArr = key.split('.');
+  if(keyArr[keyArr.length-1] == 'geojson' || keyArr[keyArr.length-1] == 'json') {
+  	queue.push(key);
+  }
 }).on('end', function(){
   doneStreamingKeys = true;
 });
