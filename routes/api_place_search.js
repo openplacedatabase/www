@@ -45,15 +45,28 @@ module.exports = function(app){
     var query;
     
     if(req.query.q) {
-      query = req.query.q;
+      query = {
+        query: {
+          query_string: {
+            query: req.query.q
+          }
+        }
+      };
     } else {
-      query = 'place.names.name:'+req.query.s;
+      query = {
+        query: {
+          match: {
+            'place.names.name': req.query.s
+          }
+        }
+      };
     }
     
+    console.log(query);
     
     esClient.search({
       index: app.locals.settings.elasticsearch_index,
-      q: query,
+      body: query,
       size: req.query.count,
       from: req.query.offset
     }, function (error, response) {
