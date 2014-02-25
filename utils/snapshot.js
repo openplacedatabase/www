@@ -11,7 +11,7 @@ var archiver = require('archiver'),
     processed = 0;
 
 if(argv._.length !== 1) {
-  console.log('Usage: node utils/snapshot.js snapshot.zip');
+  console.log('Usage: node utils/snapshot.js snapshot.zip -b <bucket>');
   process.exit();
 }
 
