@@ -1,6 +1,6 @@
 # Open Place Database
 
-An effort to provide historical boundary shapes for places worldwide in an easily consumable format. Browse it [here](http://www.openplacedatabase.com/map).
+An effort to provide historical boundary shapes for places worldwide in an easily consumable format.
 
 [![Dependency Status](https://david-dm.org/openplacedatabase/www.png)](https://david-dm.org/openplacedatabase/www)
 
@@ -31,7 +31,7 @@ cd <somewhere>
 git clone https://github.com/openplacedatabase/www.git
 ````
 
-1. [Download](http://www.openplacedatabase.org/download) the latest data snapshot.
+1. [Download](https://s3.amazonaws.com/openplacedatabase/snapshots/2014-02-26.zip) the latest data snapshot.
 
 1. Set any needed environment variables:
 ````bash
