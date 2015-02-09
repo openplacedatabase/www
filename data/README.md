@@ -1,4 +1,4 @@
-Download the latest data snapshot from (here)[http://www.openplacedatabase.org/download] and extract it into this folder.
+Download the latest data snapshot from [here](http://www.openplacedatabase.org/download) and extract it into this folder.
 
 The Open Place Database is made available under the Open Database License: http://opendatacommons.org/licenses/odbl/1.0/. 
 
